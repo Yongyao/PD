@@ -1,4 +1,7 @@
 # PD
-Planetary Defense Portal
+Planetary Defense is a project funded by NASA Goddard and NSF (NNG16PU001), and supported by NASA AIST (NNX15AM85G). 
 
-This system is funded by NASA Goddard and NSF (NNG16PU001), and supported by NASA AIST (NNX15AM85G). Developed and hosted by NSF Spatiotemporal Innovation Center on the Hybrid Cloud Service.
+Team members:
+
+Chaowei (Phil) Yang, Yongyao Jiang, Nick Bertini, Manzhu Yu, Yun Li, Alena Deveau, and Joseph George<br/>
+NSF Spatiotemporal Innovation Center
