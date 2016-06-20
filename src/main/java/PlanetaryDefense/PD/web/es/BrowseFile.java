@@ -9,9 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.elasticsearch.action.search.SearchResponse;
+import PlanetaryDefense.PD.driver.ESdriver;
 
-import PlanetaryDefense.PD.ESdriver;
 
 /**
  * Servlet implementation class BroweFile
@@ -19,7 +18,6 @@ import PlanetaryDefense.PD.ESdriver;
 @WebServlet("/BrowseFile")
 public class BrowseFile extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private ESdriver esd = new ESdriver();
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -38,6 +36,7 @@ public class BrowseFile extends HttpServlet {
 		response.setContentType("application/json");  
 		response.setCharacterEncoding("UTF-8");
 		
+		ESdriver esd = (ESdriver) request.getServletContext().getAttribute("esd");
 		String fileList = esd.getFileList();
 		PrintWriter out = response.getWriter();
 		out.print(fileList); 

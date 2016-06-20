@@ -1,4 +1,4 @@
-package PlanetaryDefense.PD;
+package PlanetaryDefense.PD.driver;
 
 import java.sql.DriverManager;
 import java.sql.ResultSet;

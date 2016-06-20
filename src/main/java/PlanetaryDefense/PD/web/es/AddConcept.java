@@ -9,16 +9,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import PlanetaryDefense.PD.ESdriver;
-
+import PlanetaryDefense.PD.driver.ESdriver;
 /**
  * Servlet implementation class AddConcept
  */
 @WebServlet("/AddConcept")
 public class AddConcept extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-	private ESdriver esd = new ESdriver();
-       
+	private static final long serialVersionUID = 1L;      
     /**
      * @see HttpServlet#HttpServlet()
      */
@@ -38,6 +35,7 @@ public class AddConcept extends HttpServlet {
 		String concept = request.getParameter("concept");
 		String def = request.getParameter("def");
 		
+		ESdriver esd = (ESdriver) request.getServletContext().getAttribute("esd");
 		esd.addConcept(concept, def);
 		PrintWriter out = response.getWriter();
 		out.print("Your concept has been added successfully."); 

@@ -12,7 +12,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 
-import PlanetaryDefense.PD.ESdriver;
+import PlanetaryDefense.PD.driver.ESdriver;
+
 
 /**
  * Servlet implementation class DeleteConcept
@@ -20,7 +21,6 @@ import PlanetaryDefense.PD.ESdriver;
 @WebServlet("/DeleteConcept")
 public class DeleteConcept extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private ESdriver esd = new ESdriver();
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -39,6 +39,8 @@ public class DeleteConcept extends HttpServlet {
 		String concept = request.getParameter("concept");
 		
 		QueryBuilder qb = QueryBuilders.queryStringQuery(concept); 
+		
+		ESdriver esd = (ESdriver) request.getServletContext().getAttribute("esd");
 		esd.deleteByQuery(esd.vocabType, qb);
 		PrintWriter out = response.getWriter();
 		out.print("Your concept has been deleted successfully."); 

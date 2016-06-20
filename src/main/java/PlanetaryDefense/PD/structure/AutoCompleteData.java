@@ -1,4 +1,4 @@
-package PlanetaryDefense.PD;
+package PlanetaryDefense.PD.structure;
 
 public class AutoCompleteData {
 	private final String label;

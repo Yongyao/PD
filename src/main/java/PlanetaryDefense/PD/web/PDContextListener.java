@@ -7,17 +7,19 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import PlanetaryDefense.PD.driver.ESdriver;
+
 /**
  * Application Lifecycle Listener implementation class FileLocationContextListener
  *
  */
 @WebListener
-public class FileLocationContextListener implements ServletContextListener {
+public class PDContextListener implements ServletContextListener {
 
     /**
      * Default constructor. 
      */
-    public FileLocationContextListener() {
+    public PDContextListener() {
         // TODO Auto-generated constructor stub
     }
 
@@ -35,16 +37,17 @@ public class FileLocationContextListener implements ServletContextListener {
          // TODO Auto-generated method stub
     	
     	//String rootPath = System.getProperty("catalina.home");
-    	
     	String rootPath = "/usr";
     	
     	ServletContext ctx = arg0.getServletContext();
     	String relativePath = ctx.getInitParameter("PathToUpload");
     	File file = new File(rootPath + File.separator + relativePath);
     	if(!file.exists()) file.mkdirs();
-    	System.out.println("File Directory is ready to be used for storing files");
     	ctx.setAttribute("FILES_DIR_FILE", file);
     	ctx.setAttribute("FILES_DIR", rootPath + File.separator + relativePath);
+    	
+    	ESdriver esd = new ESdriver();
+    	ctx.setAttribute("esd", esd);
 
     }
 	

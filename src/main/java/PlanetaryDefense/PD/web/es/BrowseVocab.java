@@ -9,15 +9,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import PlanetaryDefense.PD.ESdriver;
-
+import PlanetaryDefense.PD.driver.ESdriver;
 /**
  * Servlet implementation class BrowseVocab
  */
 @WebServlet("/BrowseVocab")
 public class BrowseVocab extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private ESdriver esd = new ESdriver();
+
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -35,6 +34,7 @@ public class BrowseVocab extends HttpServlet {
 		response.setContentType("application/json");  
 		response.setCharacterEncoding("UTF-8");
 		
+		ESdriver esd = (ESdriver) request.getServletContext().getAttribute("esd");
 		String vocabList = esd.getVocabList();
 		PrintWriter out = response.getWriter();
 		out.print(vocabList); 

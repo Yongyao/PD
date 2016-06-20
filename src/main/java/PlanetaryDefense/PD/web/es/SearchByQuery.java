@@ -9,7 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import PlanetaryDefense.PD.ESdriver;
+import PlanetaryDefense.PD.driver.ESdriver;
+
 
 /**
  * Servlet implementation class SearchByQuery
@@ -17,7 +18,6 @@ import PlanetaryDefense.PD.ESdriver;
 @WebServlet("/SearchByQuery")
 public class SearchByQuery extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private ESdriver esd = new ESdriver();
 	
     /**
      * @see HttpServlet#HttpServlet()
@@ -36,6 +36,7 @@ public class SearchByQuery extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		String query = request.getParameter("query");
 		
+		ESdriver esd = (ESdriver) request.getServletContext().getAttribute("esd");
 		String fileList = esd.searchByQuery(query);
 		PrintWriter out = response.getWriter();
 		out.print(fileList); 

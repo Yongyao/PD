@@ -1,4 +1,4 @@
-package PlanetaryDefense.PD;
+package PlanetaryDefense.PD.driver;
 
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
@@ -13,11 +13,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+import java.util.concurrent.ExecutionException;
 
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
@@ -26,6 +28,9 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.suggest.SuggestRequestBuilder;
 import org.elasticsearch.action.suggest.SuggestResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.common.hppc.cursors.ObjectObjectCursor;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -42,66 +47,43 @@ import com.google.gson.JsonObject;
 import PlanetaryDefense.PD.parse.contentReader;
 
 public class ESdriver {
-
-    String index = "files";
+	String cluster = "elasticsearch";
+    String index = "pd";
     String uploadedType = "uploadedInfo";
     
     String contentType = "contentAndMeta";
     public String vocabType = "vocabList";
     final Integer MAX_CHAR = 500;
 	
-	/*static Node node =
-		    nodeBuilder()
-		        .settings(ImmutableSettings.settingsBuilder().put("http.enabled", false))
-		        .client(true)
-		    .node();*/
-	
-	//important!!!  when deployed to VM
-    static Settings settings = 
-	System.getProperty("file.separator").equals("/") ? ImmutableSettings.settingsBuilder()
-		.put("http.enabled", "false")
-		.put("transport.tcp.port", "9300-9400")
-		.put("discovery.zen.ping.multicast.enabled", "false")
-		.put("discovery.zen.ping.unicast.hosts", "localhost")
-		.build() : ImmutableSettings.settingsBuilder().put("http.enabled", false).build();
+	//important!!!  when deployed to VM   
+    Settings settings =	System.getProperty("file.separator").equals("/") ? ImmutableSettings.settingsBuilder()
+							.put("http.enabled", "false")
+							.put("transport.tcp.port", "9300-9400")
+							.put("discovery.zen.ping.multicast.enabled", "false")
+							.put("discovery.zen.ping.unicast.hosts", "localhost")
+							.build() : ImmutableSettings.settingsBuilder().put("http.enabled", false).build();
 
-    static Node node = nodeBuilder().client(true).settings(settings).clusterName("elasticsearch").node();
+    Node node = nodeBuilder().client(true).settings(settings).clusterName(cluster).node();
 	
-    static Client client = node.client();
+    Client client = node.client();
 	
     public ESdriver(){
-    	try {
-			putMapping(index);
-			putVocabMapping(index);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
+    	putMapping(index);
+    	putVocabMapping(index);	
     }
     
 	public void RefreshIndex(){
 		node.client().admin().indices().prepareRefresh().execute().actionGet();
 	}
-	
-//	static BulkProcessor bulkProcessor = BulkProcessor.builder(   //important!!! bulkprocessor need to be closed every main step.
 
-	public void putMapping(String index) throws IOException{
-
+	public void putMapping(String index){
 		boolean exists = client.admin().indices().prepareExists(index).execute().actionGet().isExists();
 		if(exists){
 			return;
 		}
 		
         String settings_json = "{\r\n    \"analysis\": {\r\n      \"filter\": {\r\n        \"cody_stop\": {\r\n          \"type\":        \"stop\",\r\n          \"stopwords\": \"_english_\"  \r\n        },\r\n        \"cody_stemmer\": {\r\n          \"type\":       \"stemmer\",\r\n          \"language\":   \"light_english\" \r\n        }       \r\n      },\r\n      \"analyzer\": {\r\n        \"cody\": {\r\n          \"tokenizer\": \"standard\",\r\n          \"filter\": [ \r\n            \"lowercase\",\r\n            \"cody_stop\",\r\n            \"cody_stemmer\"\r\n          ]\r\n        }\r\n      }\r\n    }\r\n  }";		
-		/*XContentParser parser;
-		parser = XContentFactory.xContent(XContentType.JSON).createParser(mapping_json.getBytes());
-
-		parser.close();
-		XContentBuilder setting = jsonBuilder().copyCurrentStructure(parser);
-		System.out.print(setting.string());*/
-        //String mapping_json = "{\r\n      \"_default_\": {\r\n         \"properties\": { \r\n            \"fileName\": {\r\n            \"type\": \"multi_field\",\r\n            \"fields\": {\r\n                \"indexed\": {\r\n                \"type\": \"string\",\r\n                \"analyzer\": \"cody\"\r\n                },\r\n                \"original\": {\r\n                            \"type\" : \"string\", \r\n                            \"index\": \"not_analyzed\"\r\n                }\r\n            }\r\n         },\r\n            \"content\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n            \"metaAuthor\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n            \"metaContent\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            }\r\n         }\r\n      }\r\n   }";
-        String mapping_json = "{\r\n      \"_default_\": {\r\n         \"properties\": {            \r\n            \"fullName\": {\r\n                \"type\": \"string\",\r\n               \"index\": \"not_analyzed\"\r\n            },\r\n            \"shortName\": {\r\n                \"type\" : \"string\", \r\n                \"analyzer\": \"cody\"\r\n            },\r\n            \"name_suggest\" : {\r\n                \"type\" :  \"completion\"\r\n            },\r\n            \"content\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n            \"metaAuthor\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n            \"metaContent\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            }\r\n         }\r\n      }\r\n   }";        
+		String mapping_json = "{\r\n      \"_default_\": {\r\n         \"properties\": {            \r\n            \"fullName\": {\r\n                \"type\": \"string\",\r\n               \"index\": \"not_analyzed\"\r\n            },\r\n            \"shortName\": {\r\n                \"type\" : \"string\", \r\n                \"analyzer\": \"cody\"\r\n            },\r\n            \"name_suggest\" : {\r\n                \"type\" :  \"completion\"\r\n            },\r\n            \"content\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n            \"metaAuthor\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n            \"metaContent\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            }\r\n         }\r\n      }\r\n   }";        
 		//set up mapping
 		client.admin().indices().prepareCreate(index).setSettings(ImmutableSettings.settingsBuilder().loadFromSource(settings_json)).execute().actionGet();
 		client.admin().indices()
@@ -111,17 +93,18 @@ public class ESdriver {
 						        .execute().actionGet();
 	}
 	
-	public void putVocabMapping(String index) throws IOException{
+	public boolean putVocabMapping(String index){
 		String mapping_json = "{\r\n    \"vocabList\":{\r\n        \"properties\": {\r\n        \"Concept\": {\r\n               \"type\": \"string\",\r\n               \"index\": \"not_analyzed\"\r\n            },\r\n             \"Definition\": {\r\n               \"type\": \"string\",\r\n               \"index\": \"not_analyzed\"\r\n            }\r\n        }\r\n    }\r\n}";
 		client.admin().indices()
 								.preparePutMapping(index)
 						        .setType(vocabType)				            
 						        .setSource(mapping_json)
 						        .execute().actionGet();
+		
+		return true;
 	}
 	
 	public void addConcept(String concept, String def) throws IOException{
-		//putVocabMapping(index);
 		if(checkItemExist(vocabType, "Concept", concept))
 		{
 			IndexResponse re = client.prepareIndex(index, vocabType)
@@ -151,25 +134,30 @@ public class ESdriver {
 		}
 	}
 	
-	/*public boolean checkFileExist(String fileName){   	
-    	CountResponse count = client.prepareCount(index)
-				.setTypes(uploadedType)
-		        .setQuery(QueryBuilders.termQuery("fullName", fileName))
-		        .execute()
-		        .actionGet();
-			
-		if(count.getCount()==0){
-			return true;
-		}else{
-			return false;
+	public boolean checkTypeExist(String index, String type)
+	{
+		GetMappingsResponse res;
+		try {
+			res = client.admin().indices().getMappings(new GetMappingsRequest().indices(index)).get();
+			ImmutableOpenMap<String, MappingMetaData> mapping  = res.mappings().get(index);
+			for (ObjectObjectCursor<String, MappingMetaData> c : mapping) {
+				//System.out.println(c.key+" = "+c.value.source());
+				if(c.key.equals(type))
+				{
+					return true;
+				}
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-	}*/
-	
-	
-	
+		return false;	    
+	}
+		
 	public boolean indexNewFileInfo(String fullName, long size, String fileType) throws IOException{
-		//putMapping(index);		
-		//if(checkFileExist(fullName))
 		if(checkItemExist(fileType, "fullName", fullName))
 		{
 			IndexResponse re = client.prepareIndex(index, uploadedType)
@@ -185,7 +173,7 @@ public class ESdriver {
 			
 			node.client().admin().indices().prepareRefresh().execute().actionGet();
 			
-			System.out.println(fullName + " has been indexed.");
+			//System.out.println(fullName + " has been indexed.");
 			return true;
 		}else{
 			return false;
@@ -216,9 +204,7 @@ public class ESdriver {
 			        .get();
 			
 		node.client().admin().indices().prepareRefresh().execute().actionGet();
-		System.out.println(shortName + " has become searchable.");
-			
-		
+		//System.out.println(shortName + " has become searchable.");
 	}
 	
 	public String getFileList(){
@@ -226,39 +212,44 @@ public class ESdriver {
 		if(!exists){
 			return null;
 		}
-		
-		SearchResponse response = client.prepareSearch(index)
-		        .setTypes(uploadedType)		        
-		        .setQuery(QueryBuilders.matchAllQuery())
-		        .setSize(500)
-		        .addSort("UploadedTime",SortOrder.DESC)  
-		        .execute()
-		        .actionGet();
-        
-        Gson gson = new Gson();		
-        List<JsonObject> fileList = new ArrayList<JsonObject>();
 
-        for (SearchHit hit : response.getHits().getHits()) {
-        	Map<String,Object> result = hit.getSource();
-        	String fileName = (String) result.get("fullName");
-        	String time = (String) result.get("UploadedTime");
-        	String fileType = (String) result.get("fileType");
-        	Integer size = (Integer) result.get("size");
-        	
-        	JsonObject file = new JsonObject();
-    		file.addProperty("Name", fileName);
-    		file.addProperty("Uploaded Time", time);
-    		file.addProperty("Type", fileType);
-    		file.addProperty("Size", size);
-    		fileList.add(file);       	
-        	          
-        }
-        JsonElement fileList_Element = gson.toJsonTree(fileList);
-        
-        JsonObject PDResults = new JsonObject();
-        PDResults.add("PDResults", fileList_Element);
-        System.out.print("Browse list has been returned." + "\n");
-		return PDResults.toString();
+		if(!checkTypeExist(index, uploadedType))
+		{
+			return null;
+		}else{
+			SearchResponse response = client.prepareSearch(index)
+					.setTypes(uploadedType)		        
+					.setQuery(QueryBuilders.matchAllQuery())
+					.setSize(500)
+					.addSort("UploadedTime", SortOrder.DESC)  
+					.execute()
+					.actionGet();
+
+			Gson gson = new Gson();		
+			List<JsonObject> fileList = new ArrayList<JsonObject>();
+
+			for (SearchHit hit : response.getHits().getHits()) {
+				Map<String,Object> result = hit.getSource();
+				String fileName = (String) result.get("fullName");
+				String time = (String) result.get("UploadedTime");
+				String fileType = (String) result.get("fileType");
+				Integer size = (Integer) result.get("size");
+
+				JsonObject file = new JsonObject();
+				file.addProperty("Name", fileName);
+				file.addProperty("Uploaded Time", time);
+				file.addProperty("Type", fileType);
+				file.addProperty("Size", size);
+				fileList.add(file);       	
+
+			}
+			JsonElement fileList_Element = gson.toJsonTree(fileList);
+
+			JsonObject PDResults = new JsonObject();
+			PDResults.add("PDResults", fileList_Element);
+			//System.out.print("Browse list has been returned." + "\n");
+			return PDResults.toString();
+		}
 	}
 	
 	public String getVocabList(){
@@ -290,14 +281,8 @@ public class ESdriver {
     		vocabList.add(item);       	
         	          
         }
-        JsonElement vocabList_Element = gson.toJsonTree(vocabList);
-        
-        /*JsonObject PDResults = new JsonObject();
-        PDResults.add("PDResults", vocabList_Element);
-        System.out.print("Vocab list has been returned." + "\n");
-		return PDResults.toString();*/
-        
-        System.out.print("Vocab list has been returned." + "\n");
+        JsonElement vocabList_Element = gson.toJsonTree(vocabList);      
+        //System.out.print("Vocab list has been returned." + "\n");
 		return vocabList_Element.toString();
 	}
 	
@@ -308,17 +293,13 @@ public class ESdriver {
 				.setScroll(new TimeValue(60000))
 				.setQuery(query)
 				.setSize(10000)
-				.execute().actionGet();  //10000 hits per shard will be returned for each scroll
-
-		//SearchHit[] searchHits = scrollResp.getHits().getHits();
-
+				.execute().actionGet();  
+		
 		while (true) {
 			for (SearchHit hit : scrollResp.getHits().getHits()) {
 				DeleteResponse dr = client.prepareDelete(index, type, hit.getId()).execute().actionGet();
 				RefreshIndex();
 			}
-			
-			//System.out.println("Need to delete " + scrollResp.getHits().getHits().length + " records");
 			
 			scrollResp = client.prepareSearchScroll(scrollResp.getScrollId())
 					.setScroll(new TimeValue(600000)).execute().actionGet();
@@ -383,7 +364,6 @@ public class ESdriver {
 		List<String> SuggestList = new ArrayList<String>();
 		
 		CompletionSuggestionFuzzyBuilder suggestionsBuilder = new CompletionSuggestionFuzzyBuilder("completeMe");
-		//CompletionSuggestionBuilder suggestionsBuilder = new CompletionSuggestionBuilder("completeMe");
 	    suggestionsBuilder.text(chars);
 	    suggestionsBuilder.size(10);
 	    suggestionsBuilder.field("name_suggest");
@@ -402,7 +382,6 @@ public class ESdriver {
 	        Suggest.Suggestion.Entry.Option next = iterator.next();
 	        SuggestList.add(next.getText().string());
 	    }
-	    //System.out.print(SuggestList);
 	    return SuggestList;
 		
 	}
@@ -416,8 +395,6 @@ public class ESdriver {
 		// TODO Auto-generated method stub
 		
 		ESdriver esd = new ESdriver();
-		
-		//BufferedReader br = new BufferedReader(new FileReader("C:/Users/Yongyao/Dropbox/tmp/colloqium/100PDconcepts.csv"));
 		BufferedReader br = new BufferedReader(new FileReader("/usr/local/tomcat7/webapps/100PDconcepts.csv"));
 
 		try {
@@ -440,9 +417,6 @@ public class ESdriver {
 		
 		esd.closeES();
 		System.out.print("Done.\n");
-		
-	
-
 	}
 
 }

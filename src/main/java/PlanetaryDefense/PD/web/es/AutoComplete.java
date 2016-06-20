@@ -1,7 +1,6 @@
 package PlanetaryDefense.PD.web.es;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,9 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
-
-import PlanetaryDefense.PD.AutoCompleteData;
-import PlanetaryDefense.PD.ESdriver;
+import PlanetaryDefense.PD.driver.ESdriver;
+import PlanetaryDefense.PD.structure.AutoCompleteData;
 
 /**
  * Servlet implementation class AutoComplete
@@ -22,7 +20,6 @@ import PlanetaryDefense.PD.ESdriver;
 @WebServlet("/AutoComplete")
 public class AutoComplete extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private ESdriver esd = new ESdriver();
        
     /**
      * @see HttpServlet#HttpServlet()
@@ -52,6 +49,7 @@ public class AutoComplete extends HttpServlet {
 		
 		
 		List<AutoCompleteData> result = new ArrayList<AutoCompleteData>();
+		ESdriver esd = (ESdriver) request.getServletContext().getAttribute("esd");
 		List<String> suggestList = esd.autoComplete(chars);
         for (final String item : suggestList) {
                 result.add(new AutoCompleteData(item, item));
