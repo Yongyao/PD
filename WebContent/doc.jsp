@@ -20,55 +20,15 @@
 	<!-- bt table -->
 	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
-	<!-- bt table 
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/js/bootstrap-dialog.min.js"></script>	-->
-
-    <!-- Custom styles for this template -->
-    <link href="dashboard.css" rel="stylesheet">
+    <link href="css/dashboard.css" rel="stylesheet">
 	<script src="js/util.js"></script>
 
   </head>
   <script type="text/javascript">
     var fileList = [];
-	$(document).ready(function(){
-	        /*$("#changepwd").click(function() {				
-				$('#pwdModal').modal('show');
-		    });
-			
-			$("#changePwdSubmit").click(function() {
-                if($("#oldpwd").val()!="" && $("#newpwd").val()!="")
-				{
-				    if($("#oldpwd").val()!= $("#newpwd").val())
-					{
-				    $('#pwdBlock').text("");
-					$('#pwdModal').modal('hide');				
-					$.ajax({
-						url : "Changepwd",
-						data : {
-									"username" : $("#welUsername").text().trim().substring(9),
-									"oldpwd": $("#oldpwd").val(),
-									"newpwd": $("#newpwd").val()
-							   },
-						success : function completeHandler(response) {
-								if(response.exception!=null)
-								{
-                                showAlert("alert_placeholder", response.exception, "Danger");
-								}else{
-								showAlert("alert_placeholder", response.PDResults, "Success");
-								}
-						}
-					});			  
-					}else{
-					   $('#pwdBlock').text('Your new password is the same as your current one.');
-					}
-				}				
-		    });*/
-			/***************************************************/
-			
+	$(document).ready(function(){			
 			$("#uploadingMessage").hide();
-			
-			
+	
 			createFiletable();
 			updateFileTable();
 				
@@ -97,10 +57,7 @@
 					processData : false
 				});
 				}
-			});
-			
-
-		
+			});	
 	});
 
 

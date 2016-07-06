@@ -141,7 +141,6 @@ public class ESdriver {
 			res = client.admin().indices().getMappings(new GetMappingsRequest().indices(index)).get();
 			ImmutableOpenMap<String, MappingMetaData> mapping  = res.mappings().get(index);
 			for (ObjectObjectCursor<String, MappingMetaData> c : mapping) {
-				//System.out.println(c.key+" = "+c.value.source());
 				if(c.key.equals(type))
 				{
 					return true;
@@ -172,8 +171,6 @@ public class ESdriver {
 			        .get();
 			
 			node.client().admin().indices().prepareRefresh().execute().actionGet();
-			
-			//System.out.println(fullName + " has been indexed.");
 			return true;
 		}else{
 			return false;
@@ -204,7 +201,6 @@ public class ESdriver {
 			        .get();
 			
 		node.client().admin().indices().prepareRefresh().execute().actionGet();
-		//System.out.println(shortName + " has become searchable.");
 	}
 	
 	public String getFileList(){
@@ -247,7 +243,6 @@ public class ESdriver {
 
 			JsonObject PDResults = new JsonObject();
 			PDResults.add("PDResults", fileList_Element);
-			//System.out.print("Browse list has been returned." + "\n");
 			return PDResults.toString();
 		}
 	}
@@ -282,7 +277,6 @@ public class ESdriver {
         	          
         }
         JsonElement vocabList_Element = gson.toJsonTree(vocabList);      
-        //System.out.print("Vocab list has been returned." + "\n");
 		return vocabList_Element.toString();
 	}
 	
@@ -351,7 +345,6 @@ public class ESdriver {
         
         JsonObject PDResults = new JsonObject();
         PDResults.add("PDResults", fileList_Element);
-		System.out.print("Search results returned." + "\n");
 		return PDResults.toString();
 	}
 	
@@ -392,18 +385,15 @@ public class ESdriver {
 	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub	
 		ESdriver esd = new ESdriver();
 		BufferedReader br = new BufferedReader(new FileReader("/usr/local/tomcat7/webapps/100PDconcepts.csv"));
 
 		try {
 			String line = br.readLine();
 		    while (line != null) {	
-		    	esd.addConcept(line, "Please double-click to edit");
-		    	
-		    	line = br.readLine();
-		    	
+		    	esd.addConcept(line, "Please double-click to edit");		    	
+		    	line = br.readLine();		    	
 		    }
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

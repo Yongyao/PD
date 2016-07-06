@@ -15,46 +15,20 @@
   <!-- bt jasny -->
   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css">
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js"></script>
+  
+  <!-- bt table -->
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
 
   <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.js"></script>
   
   <!-- Custom styles for this template -->
-  <link href="dashboard.css" rel="stylesheet">
+  <link href="css/dashboard.css" rel="stylesheet">
   <script src="js/util.js"></script>
-  <style>
-  .ui-autocomplete {
-    position: absolute;
-    z-index: 1000;
-    cursor: default;
-    padding: 0;
-    margin-top: 2px;
-    list-style: none;
-    background-color: #ffffff;
-    border: 1px solid #ccc
-    -webkit-border-radius: 5px;
-       -moz-border-radius: 5px;
-            border-radius: 5px;
-    -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-       -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-	}
-	.ui-autocomplete > li {
-	  padding: 3px 20px;
-	}
-	.ui-autocomplete > li.ui-state-focus {
-	  background-color: #DDD;
-	}
-	.ui-helper-hidden-accessible {
-	  display: none;
-	}
-
-  </style>  
-
 </head>
 
 <script type="text/javascript">
 	$(document).ready(function(){
-	
 	$("#query").autocomplete({
             source: function(request, response) {
                 $.ajax({
@@ -79,8 +53,7 @@
 				$("#searchResults").hide();
 				$("#NotFound").hide();
 				$("#query").val(query);
-				search(query);
-			
+				search(query);			
 			}
 
 			$("#query").keyup(function(event){
@@ -97,9 +70,7 @@
 	
 	function search(query){
 	if($("#query").val()!="")
-				{				
-				$("#resultPanels").empty();
-				
+				{								
 				$("#searchBox").append($("#searchGroup"));
 				$("#searchjumbo").hide();
 				$("#note").hide();
@@ -120,27 +91,8 @@
 							{
 							$("#NotFound").show();
 							}else{
-							for(var i=0; i<searchResults.length; i++)
-							{
-								var col_div = $("<div/>", {
-											class : "col-md-12",
-										}).appendTo('#resultPanels');
-								
-								var panel_div = $("<div/>", {
-											class : "panel panel-default",
-										}).appendTo(col_div);
-										
-								var heading_div = $("<div/>", {
-											class : "panel-heading",
-											html: "<strong>Name: </strong>" + FileNameFormatter(searchResults[i].Name)
-										}).appendTo(panel_div);
-										
-								var body_div = $("<div/>", {
-											class : "panel-body",
-										}).appendTo(panel_div);
-										
-								fillPanelBody(body_div, searchResults[i]);
-							}
+							createResultTable();
+							$('#ResultsTable').bootstrapTable('load', searchResults);
 							}
 						}					
 					}
@@ -150,91 +102,48 @@
 	}
 	
 	function FileNameFormatter(value) {
-	    var url = "FileUpload?fileName="+encodeURIComponent(value);
-        //url = encodeURIComponent(url);		
+	    var url = "FileUpload?fileName="+encodeURIComponent(value);	
 		return '<a href=' + url + ' target="_blank">' + value + '</a>'; 
     }
 	
-	function fillPanelBody(body_div, result)
-	{
-	        var row_div = $("<div/>", {
-								class : "row",
-						}).appendTo(body_div);
-			var col_div1 = $("<div/>", {
-								class : "col-md-2",
-						}).appendTo(row_div);
-			/*var container = $("<div/>", {
-								class : ".container-fluid",
-						}).appendTo(col_div1);*/
-			//fillMetaData(container, result);
-			fillMetaData(col_div1, result);
-			
-			var col_div2 = $("<div/>", {
-								class : "col-md-10",
-								text : result.content
-						}).appendTo(row_div);
-			
+	function createResultTable() {
+		var layout = {
+			cache : false,
+			pagination : true,
+			pageSize : 10,
+			//pageList : [ 11, 25, 50, 100, 200 ],
+			//sortName : "Time",
+			//sortOrder : "asc",
+			cardView: true,
+
+			columns : [ {
+				'title' : 'Name',
+				'field' : 'Name',
+				'formatter' : FileNameFormatter,
+				sortable : true
+			}, {
+				'title' : 'Uploaded Time',
+				'field' : 'Uploaded Time',
+			}, {			
+				'title' : 'Type',
+				'field' : 'Type',
+			},
+			{
+				'title' : 'Size',
+				'field' : 'Size',
+			},
+			{
+				'title' : 'Content',
+				'field' : 'content',
+			}
+			]
+
+		};
+
+		$('#ResultsTable').bootstrapTable(layout);
 	}
 	
-	function fillMetaData(div, result){
-	      if(result.Type!=null)
-		  {
-		        var value = result.Type;
-					var row = $("<div/>", {
-								class : "row",
-								html: "<strong>Type</strong>: " + value
-								
-						}).css("margin", 0).appendTo(div);
-		  }
-		  
-		  if(result.Size!=null)
-		  {
-		        var value = result.Size;
-					var row = $("<div/>", {
-								class : "row",
-								html: "<strong>Size(K)</strong>: " + value
-								
-						}).css("margin", 0).appendTo(div);
-		  }
-		  
-		  if(result["Uploaded Time"]!=null)
-		  {
-		        var value = result["Uploaded Time"];
-					var row = $("<div/>", {
-								class : "row",
-								html: "<strong>Uploaded time</strong>: " + value
-								
-						}).css("margin", 0).appendTo(div);
-		  }
-		  
-	}
 	
-	function setGetParameter(paramName, paramValue)
-	{
-		var url = window.location.href;
-		var hash = location.hash;
-		url = url.replace(hash, '');
-		if (url.indexOf(paramName + "=") >= 0)
-		{
-			var prefix = url.substring(0, url.indexOf(paramName));
-			var suffix = url.substring(url.indexOf(paramName));
-			suffix = suffix.substring(suffix.indexOf("=") + 1);
-			suffix = (suffix.indexOf("&") >= 0) ? suffix.substring(suffix.indexOf("&")) : "";
-			url = prefix + paramName + "=" + paramValue + suffix;
-		}
-		else
-		{
-		if (url.indexOf("?") < 0)
-			url += "?" + paramName + "=" + paramValue;
-		else
-			url += "&" + paramName + "=" + paramValue;
-		}
-		window.location.href = url + hash;
-	}
-	
-	function getURLParameter(name) {
-	  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
-	}
 </script>
 
 <body>
@@ -319,7 +228,8 @@
          </div> 
 		 <p id = "searchLoading" style="text-align:center; margin:10%"><img src="images/loading.gif" height="80"><br> Please wait while results are loading. </p>
          
-		 <div class="row" id = "resultPanels"> 		   
+		<div class="row" id = "resultPanels"> 	
+         <table id="ResultsTable" class="table"></table>		 
          </div> 
 		 
 		 <div class="row" id = "NotFound" style = "font-size:medium">
@@ -380,12 +290,5 @@
 			
 		  </div>
     </footer>
-
-
-
-  
-
-
-
 </body>
 </html>
