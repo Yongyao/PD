@@ -36,7 +36,7 @@ public class DeleteConcept extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		//response.getWriter().append("Served at: ").append(request.getContextPath());
-		String concept = request.getParameter("concept");
+		/*String concept = request.getParameter("concept");
 		
 		QueryBuilder qb = QueryBuilders.queryStringQuery(concept); 
 		
@@ -44,7 +44,7 @@ public class DeleteConcept extends HttpServlet {
 		esd.deleteByQuery(esd.vocabType, qb);
 		PrintWriter out = response.getWriter();
 		out.print("Your concept has been deleted successfully."); 
-    	out.flush();
+    	out.flush();*/
 	}
 
 	/**

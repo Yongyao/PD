@@ -1,5 +1,7 @@
 package PlanetaryDefense.PD.crawler;
 
+import java.util.concurrent.TimeUnit;
+
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
@@ -14,12 +16,12 @@ public class Controller {
 
     public static void main(String[] args) throws Exception {
         String crawlStorageFolder = "C:/crawlertest/root";
-        int numberOfCrawlers = 7;
+        int numberOfCrawlers = 3;
 
         CrawlConfig config = new CrawlConfig();
         config.setCrawlStorageFolder(crawlStorageFolder);
-        config.setMaxDepthOfCrawling(1000);
-        config.setMaxPagesToFetch(1000);
+        config.setMaxDepthOfCrawling(100);
+        config.setMaxPagesToFetch(100);
         config.setResumableCrawling(false);
         
         /*
@@ -61,6 +63,9 @@ public class Controller {
          * will reach the line after this only when crawling is finished.
          */
         controller.start(MyCrawler.class, numberOfCrawlers);
+        MyCrawler.bulkProcessor.awaitClose(20, TimeUnit.MINUTES);
+        MyCrawler.esd.closeES();
+       
         
         //print out full configuration
         //config.toString(); 

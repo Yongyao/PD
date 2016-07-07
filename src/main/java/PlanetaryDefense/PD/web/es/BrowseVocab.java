@@ -31,14 +31,14 @@ public class BrowseVocab extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		response.setContentType("application/json");  
+		/*response.setContentType("application/json");  
 		response.setCharacterEncoding("UTF-8");
 		
 		ESdriver esd = (ESdriver) request.getServletContext().getAttribute("esd");
 		String vocabList = esd.getVocabList();
 		PrintWriter out = response.getWriter();
 		out.print(vocabList); 
-    	out.flush();
+    	out.flush();*/
 	}
 
 	/**

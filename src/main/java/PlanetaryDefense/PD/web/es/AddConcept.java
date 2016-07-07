@@ -32,14 +32,15 @@ public class AddConcept extends HttpServlet {
 		//response.getWriter().append("Served at: ").append(request.getContextPath());
 		/*response.setContentType("application/json");  
 		response.setCharacterEncoding("UTF-8");*/
-		String concept = request.getParameter("concept");
+		
+		/*String concept = request.getParameter("concept");
 		String def = request.getParameter("def");
 		
 		ESdriver esd = (ESdriver) request.getServletContext().getAttribute("esd");
 		esd.addConcept(concept, def);
 		PrintWriter out = response.getWriter();
 		out.print("Your concept has been added successfully."); 
-    	out.flush();
+    	out.flush();*/
 	}
 
 	/**

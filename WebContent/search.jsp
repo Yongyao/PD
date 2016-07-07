@@ -110,9 +110,16 @@
 			   }
 	}
 	
-	function FileNameFormatter(value) {
-	    var url = "FileUpload?fileName="+encodeURIComponent(value);	
-		return '<a href=' + url + ' target="_blank">' + value + '</a>'; 
+	function FileNameFormatter(value, row) {
+		if(row.Type == "webpage")
+		{
+		   var weburl = row.URL;
+		   return '<a href=' + weburl + ' target="_blank">' + value + '</a>'; 
+		}
+		else{
+			var url = "FileUpload?fileName="+encodeURIComponent(value);	
+			return '<a href=' + url + ' target="_blank">' + value + '</a>'; 
+		}
     }
 	
 	function createFacetPanel(FacetResults)
@@ -181,24 +188,29 @@
 			cardView: true,
 
 			columns : [ {
-				'title' : 'Name',
-				'field' : 'Name',
+				'title' : 'Title',
+				'field' : 'Title',
 				'formatter' : FileNameFormatter,
 				sortable : true
-			}, {
-				'title' : 'Uploaded Time',
-				'field' : 'Uploaded Time',
+			}, 
+			/*{
+				'title' : 'URL',
+				'field' : 'URL',
+			},*/
+			{
+				'title' : 'Time',
+				'field' : 'Time',
 			}, {			
 				'title' : 'Type',
 				'field' : 'Type',
 			},
-			{
+			/*{
 				'title' : 'Size',
 				'field' : 'Size',
-			},
+			},*/
 			{
 				'title' : 'Content',
-				'field' : 'content',
+				'field' : 'Content',
 			}
 			]
 

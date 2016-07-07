@@ -74,7 +74,8 @@ public class contentReader {
 			content = tika.parseToString(file);
 			//content = content.replaceAll("[\r\n]+", "\n").replaceAll("\\s+", " ");
 			//content = content.replaceAll("\\s+", " ");
-			content = content.replaceAll("[\r\n]+", " ");
+			//content = content.replaceAll("[\r\n]+", " ");
+			content = content.replaceAll("[^\\S\\r\\n]+", " ");
 
 			//System.out.println("The Content: " + content);
 		} catch (IOException e) {

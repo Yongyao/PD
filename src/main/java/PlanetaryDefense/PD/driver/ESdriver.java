@@ -14,12 +14,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.unit.ByteSizeUnit;
+import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
+import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.count.CountResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
@@ -71,11 +77,13 @@ public class ESdriver {
 
     Node node = nodeBuilder().client(true).settings(settings).clusterName(cluster).node();
 	
-    Client client = node.client();
+    public Client client = node.client();
+    
+    public BulkProcessor bulkProcessor = null;
 	
     public ESdriver(){
     	putMapping(index);
-    	putVocabMapping(index);	
+    	//putVocabMapping(index);	
     }
     
 	public void RefreshIndex(){
@@ -99,7 +107,44 @@ public class ESdriver {
 						        .execute().actionGet();
 	}
 	
-	public boolean putVocabMapping(String index){
+	public BulkProcessor createBulkProcesser(){
+		bulkProcessor = BulkProcessor.builder(
+				client,
+				new BulkProcessor.Listener() {
+					public void beforeBulk(long executionId,
+							BulkRequest request) {/*System.out.println("New request!");*/} 
+
+					public void afterBulk(long executionId,
+							BulkRequest request,
+							BulkResponse response) {/*System.out.println("Well done!");*/} 
+
+					public void afterBulk(long executionId,
+							BulkRequest request,
+							Throwable failure) {
+						System.out.println("Bulk fails!");
+						throw new RuntimeException("Caught exception in bulk: " + request + ", failure: " + failure, failure);
+					} 
+				}
+				)
+				.setBulkActions(1000) 
+				.setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)) 
+				.setConcurrentRequests(1) 
+				.build();
+		return bulkProcessor;
+	}
+
+	public void destroyBulkProcessor(){
+		try {
+			bulkProcessor.awaitClose(20, TimeUnit.MINUTES);
+			bulkProcessor = null;
+			node.client().admin().indices().prepareRefresh().execute().actionGet();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+/*	public boolean putVocabMapping(String index){
 		String mapping_json = "{\r\n    \"vocabList\":{\r\n        \"properties\": {\r\n        \"Concept\": {\r\n               \"type\": \"string\",\r\n               \"index\": \"not_analyzed\"\r\n            },\r\n             \"Definition\": {\r\n               \"type\": \"string\",\r\n               \"index\": \"not_analyzed\"\r\n            }\r\n        }\r\n    }\r\n}";
 		client.admin().indices()
 								.preparePutMapping(index)
@@ -124,7 +169,7 @@ public class ESdriver {
 			
 			node.client().admin().indices().prepareRefresh().execute().actionGet();	
 		}
-	}
+	}*/
 	
 	public boolean checkItemExist(String type, String keyName, String value){   	
     	CountResponse count = client.prepareCount(index)
@@ -169,7 +214,7 @@ public class ESdriver {
 			        .setSource(jsonBuilder()
 			                    .startObject()
 			                    .field("fullName", fullName)		                    
-			    				.field("UploadedTime", new Date())
+			    				.field("Time", new Date())
 			    				.field("fileType", fileType)
 			    				.field("size", size)
 			                    .endObject()
@@ -196,7 +241,7 @@ public class ESdriver {
 			                    .field("fullName", fullName)
 			                    .field("shortName", shortName)
 			                    .field("name_suggest", shortName)
-			    				.field("UploadedTime", new Date())
+			    				.field("Time", new Date())
 			    				.field("fileType", fileType)
 			    				.field("size", size)
 			    				.field("content", content)
@@ -223,7 +268,7 @@ public class ESdriver {
 					.setTypes(uploadedType)		        
 					.setQuery(QueryBuilders.matchAllQuery())
 					.setSize(500)
-					.addSort("UploadedTime", SortOrder.DESC)  
+					.addSort("Time", SortOrder.DESC)  
 					.execute()
 					.actionGet();
 
@@ -233,7 +278,7 @@ public class ESdriver {
 			for (SearchHit hit : response.getHits().getHits()) {
 				Map<String,Object> result = hit.getSource();
 				String fileName = (String) result.get("fullName");
-				String time = (String) result.get("UploadedTime");
+				String time = (String) result.get("Time");
 				String fileType = (String) result.get("fileType");
 				Integer size = (Integer) result.get("size");
 
@@ -253,7 +298,7 @@ public class ESdriver {
 		}
 	}
 	
-	public String getVocabList(){
+/*	public String getVocabList(){
 		boolean exists = node.client().admin().indices().prepareExists(index).execute().actionGet().isExists();	
 		if(!exists){
 			return null;
@@ -308,7 +353,7 @@ public class ESdriver {
 			}
 
 		}
-	}
+	}*/
 	
 	public String searchByQuery(String query, String filter, String filter_field){
 		boolean exists = node.client().admin().indices().prepareExists(index).execute().actionGet().isExists();	
@@ -329,7 +374,7 @@ public class ESdriver {
 		          .filteredQuery(QueryBuilders.queryStringQuery(query), filter_search);
 		}
 		SearchResponse response = client.prepareSearch(index)
-		        .setTypes(contentType)		        
+		        .setTypes(contentType, "crawler4j")		        
 		        .setQuery(qb)
 		        .setSize(500)
 		        .addAggregation(AggregationBuilders.terms("Types").field("fileType").size(0))
@@ -364,21 +409,32 @@ public class ESdriver {
 
         for (SearchHit hit : response.getHits().getHits()) {
         	Map<String,Object> result = hit.getSource();
-        	String fileName = (String) result.get("fullName");
-        	String time = (String) result.get("UploadedTime");
         	String fileType = (String) result.get("fileType");
-        	Integer size = (Integer) result.get("size");
-        	String content = (String) result.get("content");
+        	String Time = (String) result.get("Time");
+        	String Content = (String) result.get("content");
+        	String Title, URL=null;
+        	if(fileType.equals("webpage"))
+        	{
+        		Title = (String) result.get("Title");
+        		URL = (String) result.get("URL");
+        	}else{
+        		Title = (String) result.get("fullName");
+        	}
+        	//Integer size = (Integer) result.get("size");
         	
-        	int maxLength = (content.length() < MAX_CHAR)?content.length():MAX_CHAR;
-        	content = content.trim().substring(0, maxLength-1) + "...";
+        	
+        	if(!Content.equals(""))
+        	{
+        	int maxLength = (Content.length() < MAX_CHAR)?Content.length():MAX_CHAR;
+        	Content = Content.trim().substring(0, maxLength-1) + "...";
+        	}
         	
         	JsonObject file = new JsonObject();
-    		file.addProperty("Name", fileName);
-    		file.addProperty("Uploaded Time", time);
+    		file.addProperty("Title", Title);
+    		file.addProperty("Time", Time);
     		file.addProperty("Type", fileType);
-    		file.addProperty("Size", size);
-    		file.addProperty("content", content);
+    		file.addProperty("URL", URL);
+    		file.addProperty("Content", Content);
     		fileList.add(file);       	
         	          
         }
@@ -435,7 +491,7 @@ public class ESdriver {
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		// TODO Auto-generated method stub	
-		ESdriver esd = new ESdriver();
+		/*ESdriver esd = new ESdriver();
 		BufferedReader br = new BufferedReader(new FileReader("/usr/local/tomcat7/webapps/100PDconcepts.csv"));
 
 		try {
@@ -455,7 +511,7 @@ public class ESdriver {
 		}
 		
 		esd.closeES();
-		System.out.print("Done.\n");
+		System.out.print("Done.\n");*/
 	}
 
 }
