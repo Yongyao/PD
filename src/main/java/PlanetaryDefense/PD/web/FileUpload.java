@@ -119,13 +119,10 @@ public class FileUpload extends HttpServlet {
                 	File file = new File(request.getServletContext().getAttribute("FILES_DIR")+File.separator+fileItem.getName());
                 	System.out.println("Absolute Path at server="+file.getAbsolutePath());
                 	fileItem.write(file);
-                	/*out.write("File "+fileItem.getName()+ " uploaded successfully.");
-				out.write("<br>");
-				out.write("<a href=\"UploadDownloadFileServlet?fileName="+fileItem.getName()+"\">Download "+fileItem.getName()+"</a>");*/
                 	out.print("Your file has been uploaded successfully.");
                 	esd.indexNewFileContentM(shortName, fullName, size, format, request.getServletContext().getAttribute("FILES_DIR")+File.separator+fileItem.getName());
                 }else{
-                	out.print("There is already a file called the same name.");
+                	out.print("There is already a file with the same name.");
                 }
 			}
 		} catch (FileUploadException e) {

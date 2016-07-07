@@ -1,6 +1,8 @@
 /*
  * Base structure
  */
+.list-group-item .value { float:right }
+.list-group-item .key{ float:left } 
 
 /*autocomplete */ 
 .ui-autocomplete {

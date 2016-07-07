@@ -49,7 +49,14 @@
 							title: 'Confirmation',
 							message: response
 						});*/
-                        updateFileTable();						
+						if(response == "There is already a file with the same name.")
+						{
+							addAlert(response);
+						}
+						else
+						{
+                           updateFileTable();
+						}						
 					},
 					data : formData,
 					cache : false,
@@ -59,6 +66,13 @@
 				}
 			});	
 	});
+	
+	function addAlert(message) {
+    $('#alerts').append(
+        '<div class="alert alert-warning alert-fixed-top" style = "text-align: center;">' +
+            '<a class="close" data-dismiss="alert" aria-label="close">' +
+            '&times;</a>' + message + '</div>');
+    }
 
 
 	function createFiletable() {
@@ -175,7 +189,7 @@
           </ul>
 		  
 		  <ul class="nav nav-sidebar">
-            <li><a href="http://199.26.254.186/pdwiki/index.php/Main_Page" target="_blank">About (Wiki)</a></li>
+            <li><a href="http://199.26.254.186/pdwiki/index.php/Main_Page" target="_blank">Wiki</a></li>
           </ul>
           
         </div>
@@ -192,6 +206,8 @@
 			  <strong>Please wait</strong>, your file is being uploaded.<img src="images/loading.gif" height="22"> 
 			</div>
 			</div>
+			
+			<div id="alerts" style="width:80%;margin: 0 auto"></div>
 
 			  <sec:authorize access="hasRole('ROLE_ADMIN')"> 
 			  <h3>Upload file</h3>

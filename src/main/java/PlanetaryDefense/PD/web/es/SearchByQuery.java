@@ -35,9 +35,11 @@ public class SearchByQuery extends HttpServlet {
 		response.setContentType("application/json");  
 		response.setCharacterEncoding("UTF-8");
 		String query = request.getParameter("query");
+		String filter = request.getParameter("filter");
+		String filter_field = request.getParameter("filter_field");
 		
 		ESdriver esd = (ESdriver) request.getServletContext().getAttribute("esd");
-		String fileList = esd.searchByQuery(query);
+		String fileList = esd.searchByQuery(query, filter, filter_field);
 		PrintWriter out = response.getWriter();
 		out.print(fileList); 
     	out.flush();

@@ -45,30 +45,33 @@
             }   
         });
 	
-            var query = getURLParameter('query');
-			if(query==null)
-			{			
-				$("#searchResults").hide();
-			}else{
-				$("#searchResults").hide();
-				$("#NotFound").hide();
-				$("#query").val(query);
-				search(query);			
-			}
+		var query = getURLParameter('query');
+		var filter = getURLParameter('filter');
+		var filterField = getURLParameter('filterField');
+		
+		if(query==null)
+		{			
+			$("#searchResults").hide();
+		}else{
+			$("#searchResults").hide();
+			$("#NotFound").hide();
+			$("#query").val(query);
+			search(query, filter, filterField);			
+		}
 
-			$("#query").keyup(function(event){
-				if(event.keyCode == 13){
-					$("#searchButton").click();
-				}
-			});		
-			
-			$("#searchButton").click(function() {				
-				setGetParameter("query", $("#query").val());
-		   });
+		$("#query").keyup(function(event){
+			if(event.keyCode == 13){
+				$("#searchButton").click();
+			}
+		});		
+		
+		$("#searchButton").click(function() {				
+			setGetParameter("query", $("#query").val());
+	   });
 
 	});
 	
-	function search(query){
+	function search(query, filter, filter_field){
 	if($("#query").val()!="")
 				{								
 				$("#searchBox").append($("#searchGroup"));
@@ -76,23 +79,29 @@
 				$("#note").hide();
 				$("#searchResults").show();
 				$("#searchLoading").show();
+				$('#ResultsTable').bootstrapTable('destroy');
+				$("#facetPanels").empty();
 				$.ajax({
 					url : "SearchByQuery",
 					data : {
-								"query" : $("#query").val()
+								"query" : $("#query").val(),
+								"filter": filter,
+								"filter_field": filter_field
 						   },
 					success : function completeHandler(response) {
 						if(response!=null)
 						{
 							$("#searchLoading").hide();
 							console.log(response);
-							var searchResults = response.PDResults;
+							var searchResults = response.SearchResults;
 							if(searchResults.length==0)
 							{
 							$("#NotFound").show();
-							}else{
+							}else{						
 							createResultTable();
 							$('#ResultsTable').bootstrapTable('load', searchResults);
+							
+							createFacetPanel(response.FacetResults);
 							}
 						}					
 					}
@@ -105,6 +114,61 @@
 	    var url = "FileUpload?fileName="+encodeURIComponent(value);	
 		return '<a href=' + url + ' target="_blank">' + value + '</a>'; 
     }
+	
+	function createFacetPanel(FacetResults)
+	{
+		var col_div = $("#facetPanels");
+	   for (var property in FacetResults) {
+			if (FacetResults.hasOwnProperty(property)) {
+			    var list = FacetResults[property];
+				//for(var i=0; i<list.length; i++)
+				//   {
+					var panel_div = $("<div/>", {
+											class : "panel panel-default",
+											}).appendTo(col_div);
+													
+					var heading_div = $("<div/>", {
+											class : "panel-heading",
+											html: "<h4 class=\"panel-title\"><a data-toggle=\"collapse\" href=\"#collapse1\">"+property+"<\/a><\/h4>"
+													}).appendTo(panel_div);
+					var body_class = "panel-collapse collapse in";	
+                    /*if(i != 0)
+					{
+						body_class = "panel-collapse collapse";	
+					}*/
+					
+					var body_div = $("<div/>", {
+											class : body_class,
+											id: property
+												}).appendTo(panel_div);
+												
+					fillPanelBody(body_div, list, property);
+				//	}
+			}
+		} 							   
+	}
+		
+	function fillPanelBody(body_div, list, property)
+	{
+		 var ul_div = $("<ul/>", {
+									class : "list-group",
+							}).appendTo(body_div);
+		 for(var i=0; i<list.length; i++)
+		 {
+			var ul_div = $("<li/>", {
+									class : "list-group-item",
+									html:"<a>"+list[i].Key+"<\/a><span class=\"pull-right badge\">"+list[i].Value+"<\/span>"
+							}).appendTo(body_div);
+			ul_div.click({param1: list[i].Key, param2: property}, function(event) {
+			  var query = getURLParameter('query');
+			  search(query, event.data.param1, event.data.param2);	
+			  /*setGetParameter("filter", event.data.param1);	
+			  setGetParameter("filterField", event.data.param2);*/			  
+			  
+			});
+		 }
+	}
+	
 	
 	function createResultTable() {
 		var layout = {
@@ -197,7 +261,7 @@
           </ul>
 		  
 		  <ul class="nav nav-sidebar">
-            <li><a href="http://199.26.254.186/pdwiki/index.php/Main_Page" target="_blank">About (Wiki)</a></li>
+            <li><a href="http://199.26.254.186/pdwiki/index.php/Main_Page" target="_blank">Wiki</a></li>
           </ul>
           
         </div>
@@ -221,16 +285,37 @@
 		  <p style="margin-left:22%;margin-top:1%"><a class="btn btn-primary" href="doc.jsp"><span class="glyphicon glyphicon-eye-open"></span> Browse latest documents</a></p>
 	   </div>
 	   
-	   <div class="container" id = "searchResults" style="width:80%">
+	   <div class="container" id = "searchResults" style="width:90%">
 	     <div class="row" style = "border-bottom:1px solid #ddd; padding-bottom:10px;margin-bottom:10px;position:relative">
 		   <div class="col-md-12" id = "searchBox">
 		   </div>
          </div> 
 		 <p id = "searchLoading" style="text-align:center; margin:10%"><img src="images/loading.gif" height="80"><br> Please wait while results are loading. </p>
          
-		<div class="row" id = "resultPanels"> 	
-         <table id="ResultsTable" class="table"></table>		 
-         </div> 
+		<div class="row" id = "resultPanels"> 
+         <div class="col-md-3" id="facetPanels">	
+		 
+			<!--<div class="panel panel-default">
+			  <div class="panel-heading">
+				<h4 class="panel-title">
+				  <a data-toggle="collapse" href="#collapse1">Collapsible list group</a>
+				</h4>
+			  </div>
+			  <div id="collapse1" class="panel-collapse collapse in">
+				<ul class="list-group">
+				  <li class="list-group-item"><span>One</span><span class="pull-right badge">123</span></li>
+				  <li class="list-group-item">Two</li>
+				  <li class="list-group-item">Three</li>
+				</ul> 				     
+			  </div>
+	        </div> -->
+
+         </div>	
+         <div class="col-md-9">	
+		 <table id="ResultsTable" class="table"></table>
+         </div>			 
+         	 
+        </div> 
 		 
 		 <div class="row" id = "NotFound" style = "font-size:medium">
 			Your search did not match any documents. <br><strong>Suggestions</strong>:

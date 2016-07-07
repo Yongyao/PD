@@ -32,10 +32,16 @@ import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.hppc.cursors.ObjectObjectCursor;
 import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.index.query.FilterBuilder;
+import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram;
+import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogram.Bucket;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionFuzzyBuilder;
@@ -157,7 +163,7 @@ public class ESdriver {
 	}
 		
 	public boolean indexNewFileInfo(String fullName, long size, String fileType) throws IOException{
-		if(checkItemExist(fileType, "fullName", fullName))
+		if(checkItemExist(uploadedType, "fullName", fullName))
 		{
 			IndexResponse re = client.prepareIndex(index, uploadedType)
 			        .setSource(jsonBuilder()
@@ -304,19 +310,54 @@ public class ESdriver {
 		}
 	}
 	
-	public String searchByQuery(String query){
+	public String searchByQuery(String query, String filter, String filter_field){
 		boolean exists = node.client().admin().indices().prepareExists(index).execute().actionGet().isExists();	
 		if(!exists){
 			return null;
 		}
 		
-		QueryBuilder qb = QueryBuilders.queryStringQuery(query); 
+		QueryBuilder qb = null;
+		if(filter.equals(""))
+		{
+			qb = QueryBuilders.queryStringQuery(query);
+		}
+		else
+		{
+		FilterBuilder filter_search = FilterBuilders.boolFilter()
+		          .must(FilterBuilders.termFilter(filter_field, filter));
+		qb = QueryBuilders
+		          .filteredQuery(QueryBuilders.queryStringQuery(query), filter_search);
+		}
 		SearchResponse response = client.prepareSearch(index)
 		        .setTypes(contentType)		        
 		        .setQuery(qb)
 		        .setSize(500)
+		        .addAggregation(AggregationBuilders.terms("Types").field("fileType").size(0))
+		        /*.addAggregation(AggregationBuilders.dateHistogram("TimeStamp")
+		                .field("UploadedTime").interval((DateHistogram.Interval.DAY))
+		                .order(DateHistogram.Order.COUNT_DESC))*/
 		        .execute()
 		        .actionGet();
+		
+		Terms Types = response.getAggregations().get("Types");
+		List<JsonObject> TypeList = new ArrayList<JsonObject>();
+		for (Terms.Bucket entry : Types.getBuckets()) {
+			JsonObject Type = new JsonObject();
+    		Type.addProperty("Key", entry.getKey());
+    		Type.addProperty("Value", entry.getDocCount());
+    		TypeList.add(Type);
+		}
+		
+		/*DateHistogram TimeStamps = response.getAggregations().get("TimeStamp");
+		List<JsonObject> TimeList = new ArrayList<JsonObject>();
+	    List<? extends Bucket> TimeStampList = TimeStamps.getBuckets();
+	    for(int i =0; i<TimeStampList.size();i++)
+	    {
+	    	JsonObject TimeStamp = new JsonObject();
+	    	TimeStamp.addProperty("Key", TimeStampList.get(i).getKey());
+	    	TimeStamp.addProperty("Value", TimeStampList.get(i).getDocCount());
+    		TimeList.add(TimeStamp);
+	    }*/
         
         Gson gson = new Gson();		
         List<JsonObject> fileList = new ArrayList<JsonObject>();
@@ -342,9 +383,17 @@ public class ESdriver {
         	          
         }
         JsonElement fileList_Element = gson.toJsonTree(fileList);
+        JsonElement TypeList_Element = gson.toJsonTree(TypeList);
+        //JsonElement TimeList_Element = gson.toJsonTree(TimeList);
         
         JsonObject PDResults = new JsonObject();
-        PDResults.add("PDResults", fileList_Element);
+        JsonObject FacetResults = new JsonObject();
+        PDResults.add("SearchResults", fileList_Element);
+        
+        FacetResults.add("fileType", TypeList_Element);
+       // FacetResults.add("UploadedTime", TimeList_Element);
+        
+        PDResults.add("FacetResults", FacetResults);
 		return PDResults.toString();
 	}
 	
