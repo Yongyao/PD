@@ -13,11 +13,31 @@ public class Controller {
 	}
 
     public static void main(String[] args) throws Exception {
-        String crawlStorageFolder = "C:/crawlertest/";
+        String crawlStorageFolder = "C:/crawlertest/root";
         int numberOfCrawlers = 7;
 
         CrawlConfig config = new CrawlConfig();
         config.setCrawlStorageFolder(crawlStorageFolder);
+        config.setMaxDepthOfCrawling(1000);
+        config.setMaxPagesToFetch(1000);
+        config.setResumableCrawling(false);
+        
+        /*
+         * IMPORTANT CONFIG OPTIONS
+         * 
+         * - setCrawlStorageFolder
+         * - setMaxDepthOfCrawling
+         * - setMaxPagesToFetch
+         * - setResumableCrawling
+         * - setBinaryContentInCrawling
+         * - setMaxOutgoingLinksToFollow
+         * - setMaxDownloadSize ?
+         * 
+         * NEED
+         * 
+         * - index name to store stuff in
+         * - exclude_urls
+         */
 
         /*
          * Instantiate the controller for this crawl.
@@ -41,6 +61,9 @@ public class Controller {
          * will reach the line after this only when crawling is finished.
          */
         controller.start(MyCrawler.class, numberOfCrawlers);
+        
+        //print out full configuration
+        //config.toString(); 
     }
 
 }
