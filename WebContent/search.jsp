@@ -201,7 +201,6 @@
 		 }
 	}
 	
-	
 	function createResultTable() {
 		var layout = {
 			cache : false,
