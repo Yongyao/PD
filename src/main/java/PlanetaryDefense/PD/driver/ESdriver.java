@@ -97,8 +97,9 @@ public class ESdriver {
 		}
 		
         String settings_json = "{\r\n    \"analysis\": {\r\n      \"filter\": {\r\n        \"cody_stop\": {\r\n          \"type\":        \"stop\",\r\n          \"stopwords\": \"_english_\"  \r\n        },\r\n        \"cody_stemmer\": {\r\n          \"type\":       \"stemmer\",\r\n          \"language\":   \"light_english\" \r\n        }       \r\n      },\r\n      \"analyzer\": {\r\n        \"cody\": {\r\n          \"tokenizer\": \"standard\",\r\n          \"filter\": [ \r\n            \"lowercase\",\r\n            \"cody_stop\",\r\n            \"cody_stemmer\"\r\n          ]\r\n        }\r\n      }\r\n    }\r\n  }";		
-		String mapping_json = "{\r\n      \"_default_\": {\r\n         \"properties\": {            \r\n            \"fullName\": {\r\n                \"type\": \"string\",\r\n               \"index\": \"not_analyzed\"\r\n            },\r\n            \"shortName\": {\r\n                \"type\" : \"string\", \r\n                \"analyzer\": \"cody\"\r\n            },\r\n            \"name_suggest\" : {\r\n                \"type\" :  \"completion\"\r\n            },\r\n            \"content\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n            \"metaAuthor\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n            \"metaContent\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            }\r\n         }\r\n      }\r\n   }";        
-		//set up mapping
+		//String mapping_json = "{\r\n      \"_default_\": {\r\n         \"properties\": {            \r\n            \"fullName\": {\r\n                \"type\": \"string\",\r\n               \"index\": \"not_analyzed\"\r\n            },\r\n            \"shortName\": {\r\n                \"type\" : \"string\", \r\n                \"analyzer\": \"cody\"\r\n            },\r\n            \"name_suggest\" : {\r\n                \"type\" :  \"completion\"\r\n            },\r\n            \"content\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n            \"metaAuthor\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n            \"metaContent\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            }\r\n         }\r\n      }\r\n   }";        
+		String mapping_json = "{\r\n      \"_default_\": {\r\n         \"properties\": {            \r\n            \"fullName\": {\r\n                \"type\": \"string\",\r\n               \"index\": \"not_analyzed\"\r\n            },\r\n            \"shortName\": {\r\n                \"type\" : \"string\", \r\n                \"analyzer\": \"cody\"\r\n            },\r\n            \"name_suggest\" : {\r\n                \"type\" :  \"completion\"\r\n            },\r\n            \"content\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            },\r\n           \"time\": {\r\n               \"type\":   \"date\",\r\n               \"format\": \"yyyy-MM-dd\"\r\n            },\r\n            \"metaContent\": {\r\n               \"type\": \"string\",\r\n               \"analyzer\": \"cody\"\r\n            }\r\n         }\r\n      }\r\n   }      \r\n";
+        //set up mapping
 		client.admin().indices().prepareCreate(index).setSettings(ImmutableSettings.settingsBuilder().loadFromSource(settings_json)).execute().actionGet();
 		client.admin().indices()
 								.preparePutMapping(index)
@@ -214,7 +215,7 @@ public class ESdriver {
 			        .setSource(jsonBuilder()
 			                    .startObject()
 			                    .field("fullName", fullName)		                    
-			    				.field("Time", new Date())
+			    				.field("Uploaded Time", new Date())
 			    				.field("fileType", fileType)
 			    				.field("size", size)
 			                    .endObject()
@@ -268,7 +269,7 @@ public class ESdriver {
 					.setTypes(uploadedType)		        
 					.setQuery(QueryBuilders.matchAllQuery())
 					.setSize(500)
-					.addSort("Time", SortOrder.DESC)  
+					.addSort("Uploaded Time", SortOrder.DESC)  
 					.execute()
 					.actionGet();
 
@@ -278,7 +279,7 @@ public class ESdriver {
 			for (SearchHit hit : response.getHits().getHits()) {
 				Map<String,Object> result = hit.getSource();
 				String fileName = (String) result.get("fullName");
-				String time = (String) result.get("Time");
+				String time = (String) result.get("Uploaded Time");
 				String fileType = (String) result.get("fileType");
 				Integer size = (Integer) result.get("size");
 
@@ -419,6 +420,7 @@ public class ESdriver {
         		URL = (String) result.get("URL");
         	}else{
         		Title = (String) result.get("fullName");
+        		URL = "";
         	}
         	//Integer size = (Integer) result.get("size");
         	

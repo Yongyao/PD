@@ -114,12 +114,24 @@
 		if(row.Type == "webpage")
 		{
 		   var weburl = row.URL;
-		   return '<a href=' + weburl + ' target="_blank">' + value + '</a>'; 
+		   return '<h4><a href=' + weburl + ' target="_blank">' + value + '</a></h4>'; 
 		}
 		else{
 			var url = "FileUpload?fileName="+encodeURIComponent(value);	
-			return '<a href=' + url + ' target="_blank">' + value + '</a>'; 
+			return '<h4><a href=' + url + ' target="_blank">' + value + '</a></h4>'; 
 		}
+    }
+	
+	function URLFormatter(value, row) {
+		return '<h5 class="text-success">' + value + '</h5>'; 
+    }
+	
+	function TimeFormatter(value, row) {
+		return '<h5 style="font-style: italic">' + value + '</h5>'; 
+    }
+	
+	function DefaultFormatter(value, row) {
+		return '<h5>' + value + '</h5>'; 
     }
 	
 	function createFacetPanel(FacetResults)
@@ -182,10 +194,12 @@
 			cache : false,
 			pagination : true,
 			pageSize : 10,
+			striped: true,
 			//pageList : [ 11, 25, 50, 100, 200 ],
 			//sortName : "Time",
 			//sortOrder : "asc",
 			cardView: true,
+			showHeader: false,
 
 			columns : [ {
 				'title' : 'Title',
@@ -193,24 +207,24 @@
 				'formatter' : FileNameFormatter,
 				sortable : true
 			}, 
-			/*{
+			{
 				'title' : 'URL',
 				'field' : 'URL',
-			},*/
+				'formatter' : URLFormatter,
+			},
 			{
 				'title' : 'Time',
 				'field' : 'Time',
-			}, {			
+				'formatter' : TimeFormatter,
+			}, 
+			/*{			
 				'title' : 'Type',
 				'field' : 'Type',
-			},
-			/*{
-				'title' : 'Size',
-				'field' : 'Size',
 			},*/
 			{
 				'title' : 'Content',
 				'field' : 'Content',
+				'formatter' : DefaultFormatter,
 			}
 			]
 

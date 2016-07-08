@@ -78,7 +78,6 @@ public class FileUpload extends HttpServlet {
 		os.flush();
 		os.close();
 		fis.close();
-		System.out.println("File downloaded at client successfully");
 
 	}
 
