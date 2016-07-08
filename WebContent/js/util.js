@@ -47,7 +47,7 @@ $(document).ready(function(){
 		    });
 });
 
-function setGetParameter(paramName, paramValue)
+/*function setGetParameter(paramName, paramValue)
 {
 	var url = window.location.href; //URL of the current page
 	var hash = location.hash; //anchor part of the URL after '#'
@@ -84,18 +84,18 @@ function setGetParameter(paramName, paramValue)
 		}
 	}
 	window.location.href = url + hash;  //url changes - browser reloads page
-}
+} */
 
-function setGetParameters(paramNames)
+function setGetParameters(obj)
 {
 	var url = window.location.href;
 	var hash = location.hash;
 	url = url.replace(hash, '');
 
-	for(var key in paramNames)
+	/*for(var key in paramNames)
 	{
 		if (!paramNames.hasOwnProperty(key)) continue;
-		var obj = paramNames[key]; //object within object
+		var obj = paramNames[key]; */  //object within object
 		for(var prop in obj) //iterate through objects in the object
 		{
 			if(!obj.hasOwnProperty(prop)) continue;
@@ -128,7 +128,7 @@ function setGetParameters(paramNames)
 			}
 			window.location.href = url + hash;  //url changes - browser reloads page
 		}
-	}
+	//}
 	
 }
 

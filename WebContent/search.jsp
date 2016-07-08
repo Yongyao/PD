@@ -46,8 +46,7 @@
         });
 	
 		var query = getURLParameter('query');
-		var filter = getURLParameter('filter');
-		var filterField = getURLParameter('filterField');
+		var filter = getURLParameter('fileType');
 		
 		if(query==null)
 		{			
@@ -56,7 +55,7 @@
 			$("#searchResults").hide();
 			$("#NotFound").hide();
 			$("#query").val(query);
-			search(query, filter, filterField);			
+			search(query, filter, 'fileType');			
 		}
 
 		$("#query").keyup(function(event){
@@ -66,12 +65,18 @@
 		});		
 		
 		$("#searchButton").click(function() {				
-			setGetParameter("query", $("#query").val());
+			//setGetParameter("query", $("#query").val());
+			var urlParams = 
+				{
+					"query": $("#query").val()
+				};
+
+			setGetParameters(urlParams);
 	   });
 
 	});
 	
-	function search(query, filter, filter_field){
+	function search(query, filter_val, filter_field){
 	if($("#query").val()!="")
 				{								
 				$("#searchBox").append($("#searchGroup"));
@@ -85,7 +90,7 @@
 					url : "SearchByQuery",
 					data : {
 								"query" : $("#query").val(),
-								"filter": filter,
+								"filter": filter_val,
 								"filter_field": filter_field
 						   },
 					success : function completeHandler(response) {
@@ -181,14 +186,11 @@
 			ul_div.click({param1: list[i].Key, param2: property}, function(event) {
 			  var query = getURLParameter('query');
 			  //extract parameters from URL when searching and pass to search function
-			  search(query, event.data.param1, event.data.param2);	
-			  //setGetParameter("fileType", event.data.param1);	
-			  //setGetParameter("publicationDate", "2000");	
-			  //setGetParameter("somethingElse", "3000");	
+			  //search(query, event.data.param1, event.data.param2);	
 
 			  var urlParams = 
 				{
-					paramVals : {"query":"hello", "fileType":"py", "something":"joe"}
+					"fileType": event.data.param1
 				};
 
 			   setGetParameters(urlParams);
