@@ -180,9 +180,20 @@
 							}).appendTo(body_div);
 			ul_div.click({param1: list[i].Key, param2: property}, function(event) {
 			  var query = getURLParameter('query');
+			  //extract parameters from URL when searching and pass to search function
 			  search(query, event.data.param1, event.data.param2);	
-			  /*setGetParameter("filter", event.data.param1);	
-			  setGetParameter("filterField", event.data.param2);*/			  
+			  //setGetParameter("fileType", event.data.param1);	
+			  //setGetParameter("publicationDate", "2000");	
+			  //setGetParameter("somethingElse", "3000");	
+
+			  var urlParams = 
+				{
+					paramVals : {"query":"hello", "fileType":"py", "something":"joe"}
+				};
+
+			   setGetParameters(urlParams);
+
+
 			  
 			});
 		 }

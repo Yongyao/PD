@@ -49,25 +49,87 @@ $(document).ready(function(){
 
 function setGetParameter(paramName, paramValue)
 {
+	var url = window.location.href; //URL of the current page
+	var hash = location.hash; //anchor part of the URL after '#'
+	url = url.replace(hash, ''); //replaces anchor part of URL with ''
+
+	if (url.indexOf(paramName + "=") >= 0) //contains paramName + "="
+	{
+		var prefix = url.substring(0, url.indexOf(paramName)); //goes from beginning to start of paramName
+		var suffix = url.substring(url.indexOf(paramName)); //goes from start of paramName to the end
+
+		//suffix = suffix.substring(suffix.indexOf("=") + 1); 
+		//suffix = (suffix.indexOf("&") >= 0) ? suffix.substring(suffix.indexOf("&")) : ""; 
+
+		if(suffix.indexOf("&") >= 0) //if suffix has "&" in it
+		{
+			suffix = suffix.substring(suffix.indexOf("&")) //change suffix to start of & till end
+		}
+		else //if suffix does not have "&" in it
+		{
+			suffix = ""; //change suffix to nothing
+		}
+
+		url = prefix + paramName + "=" + paramValue + suffix;
+	}
+	else //does not contain paramName + "="
+	{
+		if (url.indexOf("?") < 0) //if URL contains no "?"
+		{
+			url += "?" + paramName + "=" + paramValue;
+		}
+		else //URL must contain "?"
+		{
+			url += "&" + paramName + "=" + paramValue;
+		}
+	}
+	window.location.href = url + hash;  //url changes - browser reloads page
+}
+
+function setGetParameters(paramNames)
+{
 	var url = window.location.href;
 	var hash = location.hash;
 	url = url.replace(hash, '');
-	if (url.indexOf(paramName + "=") >= 0)
+
+	for(var key in paramNames)
 	{
-		var prefix = url.substring(0, url.indexOf(paramName));
-		var suffix = url.substring(url.indexOf(paramName));
-		suffix = suffix.substring(suffix.indexOf("=") + 1);
-		suffix = (suffix.indexOf("&") >= 0) ? suffix.substring(suffix.indexOf("&")) : "";
-		url = prefix + paramName + "=" + paramValue + suffix;
+		if (!paramNames.hasOwnProperty(key)) continue;
+		var obj = paramNames[key]; //object within object
+		for(var prop in obj) //iterate through objects in the object
+		{
+			if(!obj.hasOwnProperty(prop)) continue;
+			if (url.indexOf(prop + "=") >= 0) //contains prop + "="
+			{
+				var prefix = url.substring(0, url.indexOf(prop)); //goes from beginning to start of prop
+				var suffix = url.substring(url.indexOf(prop)); //goes from start of prop to the end
+
+				if(suffix.indexOf("&") >= 0) //if suffix has "&" in it
+				{
+					suffix = suffix.substring(suffix.indexOf("&")) //change suffix to start of & till end
+				}
+				else //if suffix does not have "&" in it
+				{
+					suffix = ""; //change suffix to nothing
+				}
+
+				url = prefix + prop + "=" + obj[prop] + suffix;
+			}
+			else //does not contain prop + "="
+			{
+				if (url.indexOf("?") < 0) //if URL contains no "?"
+				{
+					url += "?" + prop + "=" + obj[prop];
+				}
+				else //URL must contain "?"
+				{
+					url += "&" + prop + "=" + obj[prop];
+				}
+			}
+			window.location.href = url + hash;  //url changes - browser reloads page
+		}
 	}
-	else
-	{
-		if (url.indexOf("?") < 0)
-			url += "?" + paramName + "=" + paramValue;
-		else
-			url += "&" + paramName + "=" + paramValue;
-	}
-	window.location.href = url + hash;
+	
 }
 
 function getURLParameter(name) {
