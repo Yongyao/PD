@@ -52,12 +52,12 @@ public class MyCrawler extends WebCrawler{
 
 	
 	
-	 /*@Override
+	 @Override
      public boolean shouldVisit(Page referringPage, WebURL url) {
          String href = url.getURL().toLowerCase();
          return !FILTERS.matcher(href).matches()
-                && href.startsWith("http://neo.jpl.nasa.gov/");
-     }*/
+                && href.startsWith("http://neo.jpl.nasa.gov/") && !href.contains("http://ssd.jpl.nasa.gov/sbdb.cgi?sstr=");
+     }
 
      /**
       * This function is called when a page is fetched and ready

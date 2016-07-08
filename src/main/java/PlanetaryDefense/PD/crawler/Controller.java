@@ -16,12 +16,12 @@ public class Controller {
 
     public static void main(String[] args) throws Exception {
         String crawlStorageFolder = "C:/crawlertest/root";
-        int numberOfCrawlers = 3;
+        int numberOfCrawlers = 10;
 
         CrawlConfig config = new CrawlConfig();
         config.setCrawlStorageFolder(crawlStorageFolder);
-        config.setMaxDepthOfCrawling(100);
-        config.setMaxPagesToFetch(100);
+        config.setMaxDepthOfCrawling(1000);
+        config.setMaxPagesToFetch(1000000);
         config.setResumableCrawling(false);
         
         /*
@@ -55,8 +55,8 @@ public class Controller {
          * which are found in these pages
          */
         controller.addSeed("http://neo.jpl.nasa.gov/");
-       /* controller.addSeed("http://www.ics.uci.edu/~welling/");
-        controller.addSeed("http://www.ics.uci.edu/");*/
+        controller.addSeed("http://global.jaxa.jp/");
+        controller.addSeed("http://neo.ssa.esa.int/");
 
         /*
          * Start the crawl. This is a blocking operation, meaning that your code
