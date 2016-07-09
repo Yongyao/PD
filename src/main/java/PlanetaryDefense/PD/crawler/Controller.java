@@ -57,6 +57,7 @@ public class Controller {
         controller.addSeed("http://neo.jpl.nasa.gov/");
         controller.addSeed("http://global.jaxa.jp/");
         controller.addSeed("http://neo.ssa.esa.int/");
+        controller.addSeed("http://neocam.ipac.caltech.edu/");
 
         /*
          * Start the crawl. This is a blocking operation, meaning that your code

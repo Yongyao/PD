@@ -64,6 +64,7 @@ public class ESdriver {
     String uploadedType = "uploadedInfo";
     
     String contentType = "contentAndMeta";
+    String crawlerType = "crawler4j";
     public String vocabType = "vocabList";
     final Integer MAX_CHAR = 500;
 	
@@ -375,7 +376,7 @@ public class ESdriver {
 		          .filteredQuery(QueryBuilders.queryStringQuery(query), filter_search);
 		}
 		SearchResponse response = client.prepareSearch(index)
-		        .setTypes(contentType, "crawler4j")		        
+		        .setTypes(contentType, crawlerType)		        
 		        .setQuery(qb)
 		        .setSize(500)
 		        .addAggregation(AggregationBuilders.terms("Types").field("fileType").size(0))
