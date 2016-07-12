@@ -36,6 +36,7 @@
 	  padding-top: 40px;
 	  padding-bottom: 40px;
 	  background-color: #eee;
+	  background-size: cover;
 	}
 
 	.form-signin {
@@ -75,7 +76,7 @@
 
 </style>
 </head>
-<body onload='document.loginForm.username.focus();' style = "background: url('images/background.jpg') no-repeat center center;background-size:100%;overflow:hidden">
+<body onload='document.loginForm.username.focus();' style = "background: url('images/background.jpg') no-repeat center center fixed;background-size:cover;overflow:hidden">
 <div class="container">
 		<form class="form-signin" name='loginForm'
 			action="<c:url value='/j_spring_security_check' />" method='POST'>
