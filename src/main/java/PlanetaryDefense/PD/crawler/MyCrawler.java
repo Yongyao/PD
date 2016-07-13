@@ -56,7 +56,8 @@ public class MyCrawler extends WebCrawler{
      public boolean shouldVisit(Page referringPage, WebURL url) {
          String href = url.getURL().toLowerCase();
          return !FILTERS.matcher(href).matches()
-                && href.startsWith("http://neo.jpl.nasa.gov/") && !href.contains("http://ssd.jpl.nasa.gov/sbdb.cgi?sstr=");
+        		&& !href.contains("http://ssd.jpl.nasa.gov/sbdb.cgi?sstr=");
+               // && href.startsWith("http://neo.jpl.nasa.gov/") && !href.contains("http://ssd.jpl.nasa.gov/sbdb.cgi?sstr=");
      }
 
      /**

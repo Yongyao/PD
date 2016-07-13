@@ -2,6 +2,7 @@ package PlanetaryDefense.PD.crawler;
 
 import java.util.concurrent.TimeUnit;
 
+import edu.stanford.nlp.io.IOUtils;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
@@ -15,7 +16,13 @@ public class Controller {
 	}
 
     public static void main(String[] args) throws Exception {
-        String crawlStorageFolder = "C:/crawlertest/root";
+        String crawlStorageFolder = null;
+        if (args.length > 0) {
+        	crawlStorageFolder = args[0];
+  	    } else {
+  	    	crawlStorageFolder = "C:/crawlertest/root";
+    	}
+       
         int numberOfCrawlers = 10;
 
         CrawlConfig config = new CrawlConfig();
@@ -58,6 +65,8 @@ public class Controller {
         controller.addSeed("http://global.jaxa.jp/");
         controller.addSeed("http://neo.ssa.esa.int/");
         controller.addSeed("http://neocam.ipac.caltech.edu/");
+        controller.addSeed("http://www.minorplanetcenter.net/iau/mpc.html");
+       
 
         /*
          * Start the crawl. This is a blocking operation, meaning that your code
