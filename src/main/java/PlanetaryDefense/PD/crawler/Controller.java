@@ -2,7 +2,6 @@ package PlanetaryDefense.PD.crawler;
 
 import java.util.concurrent.TimeUnit;
 
-import edu.stanford.nlp.io.IOUtils;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
