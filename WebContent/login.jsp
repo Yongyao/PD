@@ -77,7 +77,7 @@
 </head>
 <body onload='document.loginForm.username.focus();' style = "background: url('images/background.jpg') no-repeat center center;background-size:100%;overflow:hidden">
 <div class="container">
-		<form class="form-signin" name='loginForm'
+		<form class="form-signin" name='loginForm' id='loginForm'
 			action="<c:url value='/j_spring_security_check' />" method='POST'>
 			<h2 class="form-signin-heading" style="color:#F8F8F8">Please sign in</h2>	
 			<label for="inputEmail" class="sr-only">Email address</label> 
@@ -87,10 +87,8 @@
 			<label>
             <input type="checkbox" value="remember-me"> <span style="color:#F8F8F8">Remember me</span>
             </label>
-			<button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
 		</form>
-		
-
+		<button class="btn btn-lg btn-primary btn-block" type="submit" id="submit" style="width:300px;margin:auto">Sign in</button>
 </div>
 
 <nav class="navbar navbar-default navbar-fixed-bottom" style="padding:15px">
@@ -100,4 +98,66 @@
   </div>
 </nav>
 </body>
+<script type="text/javascript">
+//var wikiUrl = 'http://localhost/mediawiki/';
+var wikiUrl = 'http://199.26.254.186/pdwiki/';
+
+$('#submit').click(function(e) {
+    var login = $("#inputEmail").val();
+    var pass = $("#inputPassword").val();
+    wiki_auth(login, pass);
+}); 
+
+function wiki_auth(login, pass){
+    $.ajax({
+       type: 'POST',
+       url: wikiUrl+'api.php?action=login&lgname=' + login + '&lgpassword=' + pass + '&format=json',
+       xhrFields: {
+    	      withCredentials: true
+    	   },
+       crossDomain: true,
+       dataType: 'json',
+       success: function(data) {
+       	console.log(data);
+       	if(data.login.result == 'NeedToken') {
+       		wiki_auth_with_token(login, pass, data.login.token);
+       	}else{
+       		console.log('Result: ' + data.login.result);
+       		$("#loginForm").submit();
+       	}
+       },
+       error: function (data) {
+       		console.log('Error: ' + data.error);
+       		$("#loginForm").submit();
+       }
+   }); 
+}
+
+function wiki_auth_with_token(login, pass, token){
+	var url = wikiUrl+'api.php?action=login&lgname=' + login + '&lgpassword=' + pass + '&lgtoken='+ token +'&format=json';
+	console.log(url);
+	$.ajax({
+       type: 'POST',
+       url: url,
+       xhrFields: {
+ 	      withCredentials: true
+ 	   },
+       crossDomain: true,
+       dataType: 'json',
+       success: function(data) {
+       	 console.log(data);
+       	 if (data.login.result == "Success") { 
+       		 console.log('log in successfully!');
+         } else {
+                console.log('Result: '+ data.login.result);
+         }
+       	 $("#loginForm").submit(); 
+       },
+       error: function (data) {
+       	console.log('Error: ' + data.error);
+       	$("#loginForm").submit(); 
+       }
+	});
+}
+</script>
 </html>
