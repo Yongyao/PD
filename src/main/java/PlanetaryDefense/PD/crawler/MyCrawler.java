@@ -2,9 +2,13 @@ package PlanetaryDefense.PD.crawler;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -24,33 +28,6 @@ public class MyCrawler extends WebCrawler{
 	//private int countURL = 0;
 	private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
             + "|png|mp3|mp3|zip|gz))$");
-	private final String index = "pd";
-	private final String type = "crawler4j";
-	public static ESdriver esd = new ESdriver();
-	public static BulkProcessor bulkProcessor = BulkProcessor.builder(
-			esd.client,
-			new BulkProcessor.Listener() {
-				public void beforeBulk(long executionId,
-						BulkRequest request) {/*System.out.println("New request!");*/} 
-
-				public void afterBulk(long executionId,
-						BulkRequest request,
-						BulkResponse response) {/*System.out.println("Well done!");*/} 
-
-				public void afterBulk(long executionId,
-						BulkRequest request,
-						Throwable failure) {
-					System.out.println("Bulk fails!");
-					throw new RuntimeException("Caught exception in bulk: " + request + ", failure: " + failure, failure);
-				} 
-			}
-			)
-			.setBulkActions(1000) 
-			.setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)) 
-			.setConcurrentRequests(1) 
-			.build();
-
-	
 	
 	 @Override
      public boolean shouldVisit(Page referringPage, WebURL url) {
@@ -72,7 +49,8 @@ public class MyCrawler extends WebCrawler{
          if (page.getParseData() instanceof HtmlParseData) {
              HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
              String text = htmlParseData.getText();
-             text = text.replaceAll("[^\\S\\r\\n]+", " ").replaceAll("\\n+", " ").replaceAll("\\s+", " ");
+            // text = text.replaceAll("[^\\S\\r\\n]+", " ").replaceAll("\\n+", " ").replaceAll("\\s+", " ");
+             
             // String html = htmlParseData.getHtml();
             // Set<WebURL> links = htmlParseData.getOutgoingUrls();
 
@@ -81,22 +59,20 @@ public class MyCrawler extends WebCrawler{
              //System.out.println("Html length: " + html.length());
              //System.out.println("Number of outgoing links: " + links.size());
 
-             IndexRequest ir;
-			try {
-				ir = new IndexRequest(index, type).source(jsonBuilder()
-						.startObject()
-						.field("URL", url)
-						.field("Title", htmlParseData.getTitle())
-						.field("Time", new Date())
-						.field("content", text)
-						.field("fileType", "webpage")
-						.endObject());
-				bulkProcessor.add(ir);
-	     		//esd.closeES();
+            File file = new File("C:/Users/Yongyao/Desktop/reverb/data/" + UUID.randomUUID().toString());
+ 			
+ 			try {
+				file.createNewFile();
+				FileWriter fw = new FileWriter(file.getAbsoluteFile());
+	 			BufferedWriter bw = new BufferedWriter(fw);
+	 			bw.write(text);
+	 			bw.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
+			}
+
+ 			
 
      		
          }

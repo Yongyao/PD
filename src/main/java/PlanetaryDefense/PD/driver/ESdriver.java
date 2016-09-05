@@ -77,6 +77,12 @@ public class ESdriver {
 							.build() : ImmutableSettings.settingsBuilder().put("http.enabled", false).build();
 
     Node node = nodeBuilder().client(true).settings(settings).clusterName(cluster).node();
+    /*Node node =
+			nodeBuilder()
+			.settings(ImmutableSettings.settingsBuilder().put("http.enabled", false))
+			.clusterName(cluster)
+			.client(true)
+			.node();*/
 	
     public Client client = node.client();
     
@@ -84,7 +90,8 @@ public class ESdriver {
 	
     public ESdriver(){
     	putMapping(index);
-    	//putVocabMapping(index);	
+    	//putVocabMapping(index);
+    	System.out.println("\n" + "ES has been started successfully.");
     }
     
 	public void RefreshIndex(){

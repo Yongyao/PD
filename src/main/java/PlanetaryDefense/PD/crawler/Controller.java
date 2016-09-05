@@ -22,12 +22,12 @@ public class Controller {
   	    	crawlStorageFolder = "C:/crawlertest/root";
     	}
        
-        int numberOfCrawlers = 10;
+        int numberOfCrawlers = 5;
 
         CrawlConfig config = new CrawlConfig();
         config.setCrawlStorageFolder(crawlStorageFolder);
-        config.setMaxDepthOfCrawling(1000);
-        config.setMaxPagesToFetch(1000000);
+        config.setMaxDepthOfCrawling(1);
+        config.setMaxPagesToFetch(18);
         config.setResumableCrawling(false);
         
         /*
@@ -60,11 +60,30 @@ public class Controller {
          * URLs that are fetched and then the crawler starts following links
          * which are found in these pages
          */
-        controller.addSeed("http://neo.jpl.nasa.gov/");
-        controller.addSeed("http://global.jaxa.jp/");
+        controller.addSeed("https://podaac.jpl.nasa.gov/AQUA");
+        controller.addSeed("https://podaac.jpl.nasa.gov/GRACE");
+        
+        controller.addSeed("https://podaac.jpl.nasa.gov/ADEOS-II");
+        controller.addSeed("https://podaac.jpl.nasa.gov/aquarius");
+        controller.addSeed("https://podaac.jpl.nasa.gov/GEOS-3");
+        controller.addSeed("https://podaac.jpl.nasa.gov/GHRSST");
+        controller.addSeed("https://podaac.jpl.nasa.gov/ISS-RapidScat");
+        controller.addSeed("https://podaac.jpl.nasa.gov/JASON1");
+        controller.addSeed("https://podaac.jpl.nasa.gov/JASON3");
+        controller.addSeed("https://podaac.jpl.nasa.gov/MEaSUREs");
+        controller.addSeed("https://podaac.jpl.nasa.gov/MODIS");
+        controller.addSeed("https://podaac.jpl.nasa.gov/NSCAT");
+        controller.addSeed("https://podaac.jpl.nasa.gov/OSTM-JASON2");
+        controller.addSeed("https://podaac.jpl.nasa.gov/QuikSCAT");
+        controller.addSeed("https://podaac.jpl.nasa.gov/SeaSAT");
+        controller.addSeed("https://podaac.jpl.nasa.gov/SPURS");
+        controller.addSeed("https://podaac.jpl.nasa.gov/Terra");
+        controller.addSeed("https://podaac.jpl.nasa.gov/TOPEX-POSEIDON");
+        
+        /*controller.addSeed("http://global.jaxa.jp/");
         controller.addSeed("http://neo.ssa.esa.int/");
         controller.addSeed("http://neocam.ipac.caltech.edu/");
-        controller.addSeed("http://www.minorplanetcenter.net/iau/mpc.html");
+        controller.addSeed("http://www.minorplanetcenter.net/iau/mpc.html");*/
        
 
         /*
@@ -72,8 +91,7 @@ public class Controller {
          * will reach the line after this only when crawling is finished.
          */
         controller.start(MyCrawler.class, numberOfCrawlers);
-        MyCrawler.bulkProcessor.awaitClose(20, TimeUnit.MINUTES);
-        MyCrawler.esd.closeES();
+        System.out.println("Done");
        
         
         //print out full configuration
