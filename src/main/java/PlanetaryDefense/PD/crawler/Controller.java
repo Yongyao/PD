@@ -22,12 +22,12 @@ public class Controller {
   	    	crawlStorageFolder = "C:/crawlertest/root";
     	}
        
-        int numberOfCrawlers = 10;
+        int numberOfCrawlers = 8;
 
         CrawlConfig config = new CrawlConfig();
         config.setCrawlStorageFolder(crawlStorageFolder);
-        config.setMaxDepthOfCrawling(1000);
-        config.setMaxPagesToFetch(1000000);
+        config.setMaxDepthOfCrawling(50);
+        config.setMaxPagesToFetch(1000);
         config.setResumableCrawling(false);
         
         /*
@@ -72,8 +72,9 @@ public class Controller {
          * will reach the line after this only when crawling is finished.
          */
         controller.start(MyCrawler.class, numberOfCrawlers);
-        MyCrawler.bulkProcessor.awaitClose(20, TimeUnit.MINUTES);
-        MyCrawler.esd.closeES();
+       /* MyCrawler.bulkProcessor.awaitClose(20, TimeUnit.MINUTES);
+        MyCrawler.esd.closeES();*/
+        MyCrawler.bw.close();
        
         
         //print out full configuration

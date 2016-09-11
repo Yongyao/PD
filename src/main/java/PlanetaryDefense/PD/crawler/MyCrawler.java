@@ -2,11 +2,15 @@ package PlanetaryDefense.PD.crawler;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -20,22 +24,47 @@ import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 
-public class MyCrawler extends WebCrawler{
+public class MyCrawler extends WebCrawler {
 	//private int countURL = 0;
 	private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
             + "|png|mp3|mp3|zip|gz))$");
-	private final String index = "pd";
+	public static BufferedWriter bw = pre();
+	
+	public static BufferedWriter pre()
+	{
+	  File file = new File("C:/cralwer_PDPages/crawlerPages.csv");
+    if (file.exists()) {
+      file.delete();
+    }
+
+    BufferedWriter bwl = null;
+    try {
+      file.createNewFile();
+      FileWriter fw = new FileWriter(file.getAbsoluteFile());
+      bwl = new BufferedWriter(fw); 
+      bwl.write("URL, Title, Content, fileType, Collected time" + "\n");
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+    
+    return bwl;
+
+	}
+	
+	/*private final String index = "pd";
 	private final String type = "crawler4j";
 	public static ESdriver esd = new ESdriver();
 	public static BulkProcessor bulkProcessor = BulkProcessor.builder(
 			esd.client,
 			new BulkProcessor.Listener() {
 				public void beforeBulk(long executionId,
-						BulkRequest request) {/*System.out.println("New request!");*/} 
+						BulkRequest request) {System.out.println("New request!");} 
 
 				public void afterBulk(long executionId,
 						BulkRequest request,
-						BulkResponse response) {/*System.out.println("Well done!");*/} 
+						BulkResponse response) {System.out.println("Well done!");} 
 
 				public void afterBulk(long executionId,
 						BulkRequest request,
@@ -49,15 +78,15 @@ public class MyCrawler extends WebCrawler{
 			.setBulkSize(new ByteSizeValue(1, ByteSizeUnit.GB)) 
 			.setConcurrentRequests(1) 
 			.build();
-
+*/
 	
 	
 	 @Override
      public boolean shouldVisit(Page referringPage, WebURL url) {
          String href = url.getURL().toLowerCase();
          return !FILTERS.matcher(href).matches()
-        		&& !href.contains("http://ssd.jpl.nasa.gov/sbdb.cgi?sstr=");
-               // && href.startsWith("http://neo.jpl.nasa.gov/") && !href.contains("http://ssd.jpl.nasa.gov/sbdb.cgi?sstr=");
+        		&& !href.contains("http://ssd.jpl.nasa.gov/sbdb.cgi?sstr=")
+                && href.startsWith("http://neo.jpl.nasa.gov/") && !href.contains("http://ssd.jpl.nasa.gov/sbdb.cgi?sstr=");
      }
 
      /**
@@ -81,7 +110,7 @@ public class MyCrawler extends WebCrawler{
              //System.out.println("Html length: " + html.length());
              //System.out.println("Number of outgoing links: " + links.size());
 
-             IndexRequest ir;
+     /*        IndexRequest ir;
 			try {
 				ir = new IndexRequest(index, type).source(jsonBuilder()
 						.startObject()
@@ -96,7 +125,13 @@ public class MyCrawler extends WebCrawler{
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
+			} */
+             try {
+              bw.write(url + "," + StringEscapeUtils.escapeCsv(htmlParseData.getTitle()) + "," + StringEscapeUtils.escapeCsv(text) + "," + "Web page" + "," + new Date() + "\n");
+            } catch (IOException e) {
+              // TODO Auto-generated catch block
+              e.printStackTrace();
+            }
 
      		
          }
