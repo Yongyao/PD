@@ -116,7 +116,7 @@ public class FileUpload extends HttpServlet {
                 if(esd.indexNewFileInfo(fullName, size, format))
                 {
                 	File file = new File(request.getServletContext().getAttribute("FILES_DIR")+File.separator+fileItem.getName());
-                	System.out.println("Absolute Path at server="+file.getAbsolutePath());
+                	System.out.println("Uploading...Absolute Path at server="+file.getAbsolutePath());
                 	fileItem.write(file);
                 	out.print("Your file has been uploaded successfully.");
                 	esd.indexNewFileContentM(shortName, fullName, size, format, request.getServletContext().getAttribute("FILES_DIR")+File.separator+fileItem.getName());

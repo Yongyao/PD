@@ -100,65 +100,12 @@
 </nav>
 </body>
 <script type="text/javascript">
-//var wikiUrl = 'http://localhost/mediawiki/';
-var wikiUrl = 'http://199.26.254.186/pdwiki/';
 
 $('#submit').click(function(e) {
     var login = $("#inputEmail").val();
     var pass = $("#inputPassword").val();
-    wiki_auth(login, pass);
 }); 
 
-function wiki_auth(login, pass){
-    $.ajax({
-       type: 'POST',
-       url: wikiUrl+'api.php?action=login&lgname=' + login + '&lgpassword=' + pass + '&format=json',
-       xhrFields: {
-    	      withCredentials: true
-    	   },
-       crossDomain: true,
-       dataType: 'json',
-       success: function(data) {
-       	console.log(data);
-       	if(data.login.result == 'NeedToken') {
-       		wiki_auth_with_token(login, pass, data.login.token);
-       	}else{
-       		console.log('Result: ' + data.login.result);
-       		$("#loginForm").submit();
-       	}
-       },
-       error: function (data) {
-       		console.log('Error: ' + data.error);
-       		$("#loginForm").submit();
-       }
-   }); 
-}
 
-function wiki_auth_with_token(login, pass, token){
-	var url = wikiUrl+'api.php?action=login&lgname=' + login + '&lgpassword=' + pass + '&lgtoken='+ token +'&format=json';
-	console.log(url);
-	$.ajax({
-       type: 'POST',
-       url: url,
-       xhrFields: {
- 	      withCredentials: true
- 	   },
-       crossDomain: true,
-       dataType: 'json',
-       success: function(data) {
-       	 console.log(data);
-       	 if (data.login.result == "Success") { 
-       		 console.log('log in successfully!');
-         } else {
-                console.log('Result: '+ data.login.result);
-         }
-       	 $("#loginForm").submit(); 
-       },
-       error: function (data) {
-       	console.log('Error: ' + data.error);
-       	$("#loginForm").submit(); 
-       }
-	});
-}
 </script>
 </html>

@@ -133,12 +133,6 @@
 		    <version>4.5.1</version>
 		</dependency>
        
-       <!-- mediwiki add pages depends on weka csv loader -->
-        <dependency>
-			<groupId>nz.ac.waikato.cms.weka</groupId>
-			<artifactId>weka-stable</artifactId>
-			<version>3.6.6</version>
-    	</dependency>
     
   </dependencies>
 </project>

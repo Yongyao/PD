@@ -68,23 +68,26 @@ public class ESdriver {
     public String vocabType = "vocabList";
     final Integer MAX_CHAR = 500;
 	
-	//important!!!  when deployed to VM   
-    Settings settings =	System.getProperty("file.separator").equals("/") ? ImmutableSettings.settingsBuilder()
-							.put("http.enabled", "false")
-							.put("transport.tcp.port", "9300-9400")
-							.put("discovery.zen.ping.multicast.enabled", "false")
-							.put("discovery.zen.ping.unicast.hosts", "localhost")
-							.build() : ImmutableSettings.settingsBuilder().put("http.enabled", false).build();
+    Node node;
 
-    Node node = nodeBuilder().client(true).settings(settings).clusterName(cluster).node();
-	
-    public Client client = node.client();
-    
+    public Client client;
+
     public BulkProcessor bulkProcessor = null;
 	
     public ESdriver(){
-    	putMapping(index);
-    	//putVocabMapping(index);	
+      Settings settings = System.getProperty("file.separator").equals("/")
+          ? ImmutableSettings.settingsBuilder().put("http.enabled", "false")
+              .put("transport.tcp.port", "9300-9400")
+              .put("discovery.zen.ping.multicast.enabled", "false")
+              .put("discovery.zen.ping.unicast.hosts", "localhost").build()
+          : ImmutableSettings.settingsBuilder().put("http.enabled", false)
+              .build();
+
+      node = nodeBuilder().client(true).settings(settings).clusterName(cluster)
+          .node();
+      client = node.client();
+
+      putMapping(index);
     }
     
 	public void RefreshIndex(){
