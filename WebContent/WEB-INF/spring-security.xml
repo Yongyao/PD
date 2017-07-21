@@ -7,6 +7,7 @@
 
     <http pattern="/login.jsp" security="none"></http>
     <http pattern="/403.jsp" security="none"></http>
+    <http pattern="/SigninWithGoogle" security="none" />
     
     <!-- enable use-expressions -->
 	<http auto-config="true" use-expressions="true">
@@ -35,6 +36,44 @@
 				authorities-by-username-query=
 					"select username, role from user_roles where username =?  " />
 		</authentication-provider>
+	</authentication-manager>
+	
+	
+	<beans:bean id="contextSource"
+		class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
+		<beans:constructor-arg
+			value="ldap://ldap.forumsys.com:389/dc=example,dc=com" />
+		<beans:property name="anonymousReadOnly" value="true" />
+	</beans:bean>
+
+    <!-- what is this? -->
+	<beans:bean id="userSearch"
+		class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
+		<beans:constructor-arg index="0" value="" />
+		<beans:constructor-arg index="1" value="(uid={0})" />
+		<beans:constructor-arg index="2" ref="contextSource" />
+	</beans:bean>
+	
+	<beans:bean id="ldapAuthProvider"
+		class="org.springframework.security.ldap.authentication.LdapAuthenticationProvider">
+		<beans:constructor-arg>
+			<beans:bean
+				class="org.springframework.security.ldap.authentication.BindAuthenticator">
+				<beans:constructor-arg ref="contextSource" />
+				<beans:property name="userSearch" ref="userSearch" />
+				<!-- <beans:property name="userDnPatterns"> <beans:list><beans:value>uid={0},ou=People</beans:value></beans:list> 
+					</beans:property> -->
+			</beans:bean>
+		</beans:constructor-arg>
+
+		<beans:constructor-arg>
+			<beans:bean class="PlanetaryDefense.PD.web.CustomLdapAuthoritiesPopulator" />
+		</beans:constructor-arg>
+
+	</beans:bean>
+	
+	<authentication-manager>
+		<authentication-provider ref="ldapAuthProvider" />  <!--bean ID, cannot be use with spring security-->
 	</authentication-manager>
 
 </beans:beans>

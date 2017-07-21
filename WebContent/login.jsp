@@ -10,6 +10,10 @@
 	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<!--google sign in-->
+	<script src="https://apis.google.com/js/platform.js" async defer></script>
+	<meta name="google-signin-client_id" content="139919091373-larqclqlkvs07c9m8abagn49hqm1q424.apps.googleusercontent.com">
+
 	<style>
 	.error {
 		padding: 15px;
@@ -32,7 +36,7 @@
 	}   
 	
 	
-		body {
+	body {
 	  padding-top: 40px;
 	  padding-bottom: 40px;
 	  background-color: #eee;
@@ -89,7 +93,11 @@
             <input type="checkbox" value="remember-me"> <span style="color:#F8F8F8">Remember me</span>
             </label>
 		</form>
-		<button class="btn btn-lg btn-primary btn-block" type="submit" id="submit" style="width:300px;margin:auto">Sign in</button>
+
+		<input type="button" class="btn btn-lg btn-primary btn-block" type="submit" id="submit" style="width:300px;margin:auto" value="Login"></input>
+		<br>
+		<!--<button class="btn btn-lg btn-primary btn-block" type="submit" id="submit" style="width:300px;margin:auto">Sign in</button>-->
+		<div class="g-signin2" data-onsuccess="onSignIn" style="width:300px;margin:auto"></div>
 </div>
 
 <nav class="navbar navbar-default navbar-fixed-bottom" style="padding:15px">
@@ -104,7 +112,47 @@
 $('#submit').click(function(e) {
     var login = $("#inputEmail").val();
     var pass = $("#inputPassword").val();
-}); 
+    $("#loginForm").submit(); 
+});
+
+/*function onSignIn(googleUser) {
+  var profile = googleUser.getBasicProfile();
+  console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+  console.log('Name: ' + profile.getName());
+  console.log('Image URL: ' + profile.getImageUrl());
+  console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+} */
+function onSignIn(googleUser) {
+		// The ID token you need to pass to your backend:
+		var id_token = googleUser.getAuthResponse().id_token;
+		
+		$.ajax({
+			url : "SigninWithGoogle", 
+			type : 'POST',
+			success : function completeHandler(response) {
+				console.log(response);
+				if (response.indexOf('success') !== -1)
+					window.location = "doc.jsp";						
+			},
+			data :{
+				"token" : id_token
+		   }
+			
+		});
+		/* var xhr = new XMLHttpRequest();
+		xhr.open('POST', 'googleSignIn');
+		xhr.setRequestHeader('Content-Type',
+				'application/x-www-form-urlencoded');
+		xhr.onload = function() {
+			if (xhr.responseText === 'Success')
+				window.location = "/doc.jsp";
+		};
+		xhr.send(id_token); */
+	}
+	window.onbeforeunload = function(e) {
+		// gapi.auth.signOut();
+        gapi.auth2.getAuthInstance().signOut();
+	};
 
 
 </script>
